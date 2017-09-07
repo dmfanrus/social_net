@@ -22,6 +22,7 @@ public class FriendsServlet extends HttpServlet{
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         log.debug("POST");
+
         super.doPost(req, resp);
     }
 }
