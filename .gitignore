@@ -1,0 +1,9 @@
+*.class
+.mtf.tmp/
+*.jar
+*.war
+*.ear
+hs err_pid*
+*.iml
+.idea/*
+
