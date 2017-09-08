@@ -28,7 +28,7 @@ public class UsersServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         log.debug("GET - user[{}]", ((User) req.getSession(false).getAttribute("user")).getId());
         long countPages = 0;
-        long currentPage = 0;
+        long currentPage;
         Optional<Long> countUsers = userService.getCount();
         if (req.getParameter("currentPage") == null) {
             req.setAttribute("currentPage", 1);
@@ -40,11 +40,11 @@ public class UsersServlet extends HttpServlet {
 
         if (countUsers.isPresent()) {
             countPages = (long) Math.ceil((float)countUsers.get()/10.0);
-            log.debug("Count of users in db - {}, div - {}, countpage - {}", countUsers.get(), (float)(countUsers.get()/10), countPages);
+            log.debug("Count of users in DB - {}, div - {}, countpage - {}", countUsers.get(), (float)(countUsers.get()/10), countPages);
             req.setAttribute("countPages", countPages);
         } else {
             log.warn("getCounts() returned null");
-            /**
+            /*
              * Возможно перенаправлять на сообщение ошибки
              */
         }
