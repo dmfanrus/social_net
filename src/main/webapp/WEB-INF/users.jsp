@@ -18,7 +18,6 @@
     <div class="row">
         <div class="col-lg-2"></div>
         <div class="col-lg-8">
-                <%--<div class="container">--%>
             <c:forEach items="${usersList}" var="currentUser">
                 <div class="panel panel-default">
                     <div class="row">
@@ -50,26 +49,44 @@
 
             <nav aria-label="Page navigation">
                 <ul class="pagination">
-                    <li <c:if test="${(currentPage-1) <= 0}">class="disabled"</c:if>>
-                        <c:url var="usersUrl" value="/users?currentPage=${(currentPage-1)}"/>
-                        <a href="${usersUrl}" aria-label="Previous">
-                            <span aria-hidden="true">&laquo;</span>
-                        </a>
-                    </li>
-                    <c:forEach var="iPage" begin="${currentPage}" end="${currentPage+4}" step="1">
-                        <c:if test="${iPage>2 && iPage<=(countPages+2)}">
-                            <c:url var="usersUrl" value="/users?currentPage=${iPage-2}"/>
-                            <li <c:if test="${iPage==(currantPage+2)}">class=".active"</c:if>>
-                                <a href="${usersUrl}">${iPage-2}</a></li>
-                        </c:if>
+                    <c:if test="${page > 5}">
+                        <li>
+                            <c:url var="usersUrl" value="/users">
+                                <c:param name="page" value="1"/>
+                            </c:url>
+                            <a href="${usersUrl}" aria-label="First">1</a>
+                        </li>
+                    </c:if>
+                    <c:if test="${(page-1) > 0}">
+                        <li>
+                            <c:url var="usersUrl" value="/users">
+                                <c:param name="page" value="${(page-1)}"/>
+                            </c:url>
+                            <a href="${usersUrl}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    </c:if>
+                    <c:forEach var="iPage" begin="${startPage}" end="${endPage}" step="1">
+                        <li <c:if test="${iPage==page}">class=".active"</c:if>>
+                            <c:url var="usersUrl" value="/users">
+                                <c:param name="page" value="${iPage}"/>
+                            </c:url>
+                            <a href="${usersUrl}">${iPage}</a>
+                        </li>
                     </c:forEach>
-                    <li <c:if test="${(currentPage+1)>(countPages)}">class="disabled"</c:if>>
-                        <c:url var="usersUrl" value="/users?currentPage=${(currentPage+1)}"/>
-                        <a href="${usersUrl}" aria-label="Next">
-                            <span aria-hidden="true">&raquo;</span>
-                        </a>
-                    </li>
+                    <c:if test="${(page+1)<=(countPages)}">
+                        <li>
+                            <c:url var="usersUrl" value="/users">
+                                <c:param name="page" value="${(page+1)}"/>
+                            </c:url>
+                            <a href="${usersUrl}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </c:if>
                 </ul>
+
             </nav>
                 <%--<form name="searchForm" method="post" action="result">--%>
                 <%--<div class="form-group">--%>

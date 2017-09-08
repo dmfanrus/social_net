@@ -27,38 +27,43 @@ public class UsersServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         log.debug("GET - user[{}]", ((User) req.getSession(false).getAttribute("user")).getId());
-        long countPages = 0;
-        long currentPage;
         Optional<Long> countUsers = userService.getCount();
-        if (req.getParameter("currentPage") == null) {
-            req.setAttribute("currentPage", 1);
-            currentPage = 1;
-        } else {
-            currentPage = Long.parseLong(req.getParameter("currentPage"));
-            req.setAttribute("currentPage", currentPage);
-        }
-
         if (countUsers.isPresent()) {
-            countPages = (long) Math.ceil((float)countUsers.get()/10.0);
-            log.debug("Count of users in db - {}, div - {}, countpage - {}", countUsers.get(), (float)(countUsers.get()/10), countPages);
+            long countPages = (long) Math.ceil((float) countUsers.get() / 10.0);
+            log.debug("Count of users in db - {}, div - {}, countpage - {}", countUsers.get(), (float) (countUsers.get() / 10), countPages);
             req.setAttribute("countPages", countPages);
-        } else {
-            log.warn("getCounts() returned null");
-            /*
-             * Возможно перенаправлять на сообщение ошибки
-             */
-        }
-        List<User> users = userService.getUsers((currentPage - 1) * 10, 10);
+
+            long currentPage = 1;
+            if (req.getParameter("page") == null) {
+                req.setAttribute("page", 1);
+            } else {
+                currentPage = Long.parseLong(req.getParameter("page"));
+                if(countPages < currentPage){
+                    req.getRequestDispatcher("/WEB-INF/error.jsp")
+                            .forward(req, resp);
+                }
+                req.setAttribute("page", currentPage);
+            }
+            List<User> users = userService.getUsers((currentPage - 1) * 10, 10);
 
 //        List<User> userList = new ArrayList<>();
 //        for (Optional<User> user : users) {
 //            if(user.isPresent())
 //                userList.add(user.get());(
 //        }
-        log.debug("GET - countPages={}  currentPage={}", countPages, currentPage);
-        req.setAttribute("usersList", users);
-        req.getRequestDispatcher("/WEB-INF/users.jsp")
-                .forward(req, resp);
+            long startPage = currentPage - 2 > 0 ? currentPage - 2 : 1;
+            long endPage = startPage + 5 <= countPages ? startPage + 5 : countPages;
+            req.setAttribute("startPage", startPage);
+            req.setAttribute("endPage", endPage);
+            req.setAttribute("usersList", users);
+            log.debug("GET - countPages={}  currentPage={}", countPages, currentPage);
+            req.getRequestDispatcher("/WEB-INF/users.jsp")
+                    .forward(req, resp);
+        } else {
+            log.warn("getCounts() returned null");
+            req.getRequestDispatcher("/WEB-INF/profile.jsp")
+                    .forward(req, resp);
+        }
     }
 
     @Override
