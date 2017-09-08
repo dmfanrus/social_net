@@ -14,7 +14,7 @@ public class FriendsServlet extends HttpServlet{
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FriendsServlet.class);
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        log.debug("GET - user[{}]",((User)req.getSession().getAttribute("user")).getId());
+        log.debug("GET - user[{}]",((User)req.getSession(false).getAttribute("user")).getId());
         req.getRequestDispatcher("/WEB-INF/friends.jsp")
                 .forward(req,resp);
     }
