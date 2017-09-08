@@ -15,7 +15,7 @@ public class Profile_UPD_Servlet extends HttpServlet{
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        log.debug("GET - user[{}]",((User)req.getSession().getAttribute("user")).getId());
+        log.debug("GET - user[{}]",((User)req.getSession(false).getAttribute("user")).getId());
         req.getRequestDispatcher("/WEB-INF/update_profile.jsp")
                 .forward(req,resp);
     }

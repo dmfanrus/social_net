@@ -15,10 +15,10 @@ public class LogoutServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        log.debug("GET - user[{}]",((User)req.getSession().getAttribute("user")).getId());
+        log.debug("GET - user[{}]",((User)req.getSession(false).getAttribute("user")).getId());
         if(req.getSession(false).getAttribute("user")!=null) {
-            log.debug("Deleted user from session - {}", req.getSession(false).getAttribute("user").toString());
-            req.getSession().removeAttribute("user");
+            log.debug("Invalidate session with user- {}", req.getSession(false).getAttribute("user").toString());
+            req.getSession(false).invalidate();
         }
         final String rootPage = req.getContextPath()+"/";
         resp.sendRedirect(rootPage);

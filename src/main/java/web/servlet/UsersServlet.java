@@ -26,7 +26,7 @@ public class UsersServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        log.debug("GET - user[{}]", ((User) req.getSession().getAttribute("user")).getId());
+        log.debug("GET - user[{}]", ((User) req.getSession(false).getAttribute("user")).getId());
         long countPages = 0;
         long currentPage = 0;
         Optional<Long> countUsers = userService.getCount();
