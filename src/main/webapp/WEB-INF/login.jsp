@@ -6,7 +6,7 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ taglib prefix="tags" tagdir="/WEB-INF/tags" %>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <fmt:setLocale value="${sessionScope.locale}"/>
@@ -18,11 +18,11 @@
     <div class="row">
         <div class="col-lg-2"></div>
         <div class="col-lg-10">
-            <form class="form-horizontal" name="loginForm" method="post" action="login">
+            <form class="form-horizontal" name="loginForm" method="post">
                 <div class="form-group">
                     <div class="col-lg-1"></div>
                     <div class="col-lg-7">
-                        <h2 class="text-center">${title}</h2>
+                        <h2 class="text-center"><c:out value="${title}"/></h2>
                     </div>
                 </div>
                 <c:choose>
@@ -37,7 +37,7 @@
                         </div>
                     </c:when>
                     <c:otherwise>
-                        </br>
+                        <br>
                     </c:otherwise>
                 </c:choose>
                 <div class="form-group">

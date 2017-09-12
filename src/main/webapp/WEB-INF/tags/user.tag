@@ -16,7 +16,7 @@
     <script src="${bsJs}"></script>
     <c:url var="mainCss" value="/resources/css/mainStyle.css"/>
     <link rel="stylesheet" href="${mainCss}"/>
-    <title>${title}</title>
+    <title><c:out value="${title}"/></title>
 </head>
 <body>
 

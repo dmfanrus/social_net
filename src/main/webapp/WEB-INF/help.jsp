@@ -6,7 +6,7 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ taglib prefix="tags" tagdir="/WEB-INF/tags" %>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <fmt:setLocale value="${sessionScope.locale}"/>
@@ -14,7 +14,7 @@
 <fmt:message var="title" bundle="${help}" key="help.title"/>
 
 <tags:user title="${title}">
-    <h2>${title}</h2>
+    <h2><c:out value="${title}"/></h2>
     <p>
         YourBooks - рекомендательный сервис книжной литературы.
         В нашей базе собрано более 1500 тысяч книг.
@@ -27,7 +27,7 @@
     </p>
     <br>
     <p>Вы также можете оставить свой комментарий разработчику.</p>
-    <form action="php/send.php" method="post">
+    <form method="post">
         <div class="form-group">
             <label for="name">Имя:</label>
             <input type="text" name="name" id="name" placeholder="Укажите имя">

@@ -8,6 +8,7 @@ import model.User;
 import service.SecurityService;
 import service.UserService;
 
+import javax.swing.text.html.Option;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -43,7 +44,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public List<User> getUsers(long start_num, long counts) {
+    public Optional<List<User>> getUsers(long start_num, long counts) {
         return userDao.getUsers(start_num,counts);
     }
 

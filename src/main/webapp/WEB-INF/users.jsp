@@ -6,15 +6,15 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ taglib prefix="tags" tagdir="/WEB-INF/tags" %>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <fmt:setLocale value="${sessionScope.locale}"/>
 <fmt:setBundle basename="i18n.users" var="users"/>
 <fmt:message var="title" bundle="${users}" key="users.title"/>
-
+<jsp:useBean id="usersList" scope="request" type="java.util.List"/>
 <tags:user title="${title}">
-    <h2>${title}</h2>
+    <h2><c:out value="${title}"/></h2>
     <div class="row">
         <div class="col-lg-2"></div>
         <div class="col-lg-8">

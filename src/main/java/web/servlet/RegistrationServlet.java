@@ -24,7 +24,6 @@ public class RegistrationServlet extends HttpServlet {
     private final UserService userService;
     private final SecurityService securityService;
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RegistrationServlet.class);
-    private FormValidation validate;
 
     @Inject
     public RegistrationServlet(UserService userService, SecurityService securityService) {
@@ -60,7 +59,7 @@ public class RegistrationServlet extends HttpServlet {
         fields.put("dateOfBirth", req.getParameter("dateOfBirth"));
         fields.put("gender", req.getParameter("gender"));
 
-        formValidation(fields);
+        FormValidation validate =  formValidation(fields);
 
         if (validate.isValid()) {
             log.debug("Form fields is valid");
@@ -75,28 +74,29 @@ public class RegistrationServlet extends HttpServlet {
             Optional<User> user = userService.createUser(userIn);
             if (user.isPresent()) {
                 log.debug("Create user[{}] is success", user.get().getId());
-                req.getSession().setAttribute("user", user.get());
+                req.getSession(true).setAttribute("user", user.get());
+                resp.setStatus(HttpServletResponse.SC_OK);
                 resp.sendRedirect(req.getContextPath() + "/profile");
                 return;
             } else {
-                /**
+                /*
                  * Как вариант, перенаправлять на страницу ошибки
                  */
-                req.setAttribute("errorPage", "error");
-                req.getRequestDispatcher("/WEB-INF/registration.jsp").forward(req, resp);
+                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                req.getRequestDispatcher("/WEB-INF/error.jsp").forward(req, resp);
                 return;
             }
         }
 
-//        validate.getErrors().forEach((fieldName, fieldValue) -> System.out.println(fieldName + "   " + fieldValue));
         log.debug("Form is not valid({})",validate.getErrors());
         req.setAttribute("fields", fields);
         req.setAttribute("errors", validate.getErrors());
+        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         req.getRequestDispatcher("/WEB-INF/registration.jsp").forward(req, resp);
     }
 
-    private void formValidation(HashMap<String, String> fields) {
-        validate = new FormValidation();
+    private FormValidation formValidation(HashMap<String, String> fields) {
+        FormValidation validate = new FormValidation();
         validate.validateFullName(fields.get("fullName"));
         validate.validateEmail(fields.get("email"));
         validate.validateCredentials(Credentials.builder().login(fields.get("login")).password(fields.get("password")).build());
@@ -105,6 +105,7 @@ public class RegistrationServlet extends HttpServlet {
 
         if (userService.checkExistByLogin(fields.get("login")))
             validate.setError("login", "loginNotUsed");
+        return validate;
     }
 
 }

@@ -6,23 +6,24 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ taglib prefix="tags" tagdir="/WEB-INF/tags" %>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <fmt:setLocale value="${sessionScope.locale}"/>
 <fmt:setBundle basename="i18n.registration" var="registration"/>
 <fmt:setBundle basename="i18n.errorsMessage" var="errorsMessage"/>
 <fmt:message var="title" bundle="${registration}" key="registration.title"/>
-
+<%--<jsp:useBean id="errors" scope="request" type="java.util.Map"/>--%>
+<%--<jsp:useBean id="fields" scope="request" type="java.util.Map"/>--%>
 <tags:user title="${title}">
     <div class="row">
         <div class="col-lg-2"></div>
         <div class="col-lg-10">
-            <form class="form-horizontal" name="registrationForm" method="post" action="registration">
+            <form class="form-horizontal" name="registrationForm" method="post">
                 <div class="form-group">
                     <div class="col-lg-1"></div>
                     <div class="col-lg-7">
-                        <h2 class="text-center">${title}</h2>
+                        <h2 class="text-center"><c:out value="${title}"/></h2>
                     </div>
                 </div>
                 <c:choose>
@@ -37,7 +38,7 @@
                         </div>
                     </c:when>
                     <c:otherwise>
-                        </br>
+                        <br>
                     </c:otherwise>
                 </c:choose>
                 <div class="form-group">

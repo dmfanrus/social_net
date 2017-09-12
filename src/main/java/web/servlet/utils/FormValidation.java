@@ -1,16 +1,10 @@
 package web.servlet.utils;
-import javafx.util.Pair;
 import model.Credentials;
 
-import java.sql.Time;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Михаил on 06.01.2017.
@@ -26,7 +20,7 @@ public class FormValidation {
             "^[A-Za-z][A-Za-z0-9]*?([-_][A-Za-z0-9]+){0,2}$";
 
     private static final String FULLNAME_PATTERN =
-            "^[a-zA-Zа-яА-ЯёЁ'][a-zA-Z-а-яА-ЯёЁ' ]+[a-zA-Zа-яА-ЯёЁ']?$";
+            "^[a-zA-Zа-яА-ЯёЁ'][a-zA-Z-а-яА-ЯёЁ']+[a-zA-Zа-яА-ЯёЁ']?$";
 
     private Map<String,String> errors = new HashMap<>();
 

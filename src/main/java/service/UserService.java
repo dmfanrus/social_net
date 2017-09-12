@@ -15,6 +15,6 @@ public interface UserService {
     Optional<User> createUser(User user);
     boolean checkExistByLogin(String login);
     List<Optional<User>> getAllUsers();
-    List<User>  getUsers(long start_num, long counts);
+    Optional<List<User>>  getUsers(long start_num, long counts);
     Optional<Long> getCount();
 }

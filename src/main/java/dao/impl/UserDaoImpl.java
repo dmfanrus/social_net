@@ -84,7 +84,7 @@ public class UserDaoImpl implements UserDao {
                                 .dateOfBirth(resultSet.getDate("user_dateofbirth").toLocalDate())
                                 .build());
             } else {
-                Optional.empty();
+                return Optional.empty();
             }
         } catch (SQLException e) {
             log.error("Failed to get user by ID", e);
@@ -151,7 +151,7 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public List<User> getUsers(long start_num, long counts) {
+    public Optional<List<User>> getUsers(long start_num, long counts) {
         try (Connection connection = dataSource.getConnection()) {
             final PreparedStatement select = connection.prepareStatement(
                     "SELECT user_id, user_fullname, user_email, user_gender, user_login, user_dateofbirth " +
@@ -173,12 +173,12 @@ public class UserDaoImpl implements UserDao {
                                 .build());
             }
             log.debug("Return array of users[{}]", users.size());
-            return users;
+            return Optional.of(users);
         } catch (SQLException e) {
             log.error("Failed to get users by count", e);
         }
         log.error("Failed to get DS Connection");
-        return new ArrayList<>();
+        return Optional.empty();
     }
 
     @Override
@@ -190,7 +190,7 @@ public class UserDaoImpl implements UserDao {
             select.executeQuery();
             final ResultSet resultSet = select.getResultSet();
             if(resultSet.next()) {
-                return Optional.of(new Long(resultSet.getLong(1)));
+                return Optional.of(resultSet.getLong(1));
             } else {
                 return Optional.empty();
             }

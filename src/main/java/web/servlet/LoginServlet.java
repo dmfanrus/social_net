@@ -21,7 +21,6 @@ public class LoginServlet extends HttpServlet {
 
 
     private final UserService userService;
-    private FormValidation validate;
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(LoginServlet.class);
 
     @Inject
@@ -46,34 +45,38 @@ public class LoginServlet extends HttpServlet {
                 .password(req.getParameter("password"))
                 .build();
 
-        formValidation(credentials);
+        FormValidation validate = formValidation(credentials);
 
         if (validate.isValid()) {
             Optional<User> user = userService.getByCredentials(credentials);
             if (user.isPresent()) {
-                req.getSession().setAttribute("user", user.get());
+                log.debug("User: {}", user);
+                req.getSession(true).setAttribute("user", user.get());
+                resp.setStatus(HttpServletResponse.SC_OK);
                 resp.sendRedirect(req.getContextPath() + "/profile");
                 return;
             } else {
-                /**
+                /*
                  * Как вариант, перенаправлять на страницу ошибки
                  */
                 req.setAttribute("loginPass", "invalid");
                 req.setAttribute("data",credentials);
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 req.getRequestDispatcher("/WEB-INF/login.jsp").forward(req, resp);
                 return;
             }
         }
 
-//        validate.getErrors().forEach((fieldName,fieldValue)-> System.out.println(fieldName + "   " + fieldValue));
         req.setAttribute("data",credentials);
         req.setAttribute("errors", validate.getErrors());
+        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         req.getRequestDispatcher("/WEB-INF/login.jsp").forward(req, resp);
     }
 
 
-    private void formValidation(Credentials credentials) {
-        validate = new FormValidation();
+    private FormValidation formValidation(Credentials credentials) {
+        FormValidation validate = new FormValidation();
         validate.validateCredentials(credentials);
+        return validate;
     }
 }
