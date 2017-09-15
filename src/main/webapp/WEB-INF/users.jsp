@@ -18,6 +18,20 @@
     <div class="row">
         <div class="col-lg-2"></div>
         <div class="col-lg-8">
+            <form class="form-horizontal" name="usersForm" method="post">
+                <div class="form-group">
+                    <div class="col-lg-1"></div>
+                    <div class="col-lg-7">
+                        <input class="form-control"
+                               placeholder="<fmt:message bundle="${users}" key="users.fullName"/>"
+                               name="fullName" id="fullName" value="<c:out value="${fullName}"/>">
+                    </div>
+                    <button class="btn btn-default" type="submit">
+                        <fmt:message bundle="${users}" key="users.search"/>
+                    </button>
+                </div>
+            </form>
+            <br>
             <c:forEach items="${usersList}" var="currentUser">
                 <div class="panel panel-default">
                     <div class="row">
@@ -46,7 +60,6 @@
                     </div>
                 </div>
             </c:forEach>
-
             <nav aria-label="Page navigation">
                 <ul class="pagination">
                     <c:if test="${page > 5}">

@@ -54,6 +54,16 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    public Optional<Long> getCount(String fullName) {
+        return userDao.getCount(fullName);
+    }
+
+    @Override
+    public Optional<List<User>> getUsers(String fullName, long start_num, long counts) {
+        return userDao.getUsers(fullName, start_num, counts);
+    }
+
+    @Override
     public Optional<User> getByCredentials(Credentials credentials) {
         Optional<User> user = userDao.getByLogin(credentials.getLogin());
         if(user.isPresent() && securityService.validate(credentials.getPassword(),user.get().getHashPassword())){

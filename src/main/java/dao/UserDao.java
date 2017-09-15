@@ -15,5 +15,7 @@ public interface UserDao {
     Optional<User> createUser(User user);
     List<Optional<User>> getAllUsers();
     Optional<List<User>> getUsers(long start_num,long counts);
+    Optional<List<User>> getUsers(String fullName, long start_num, long counts);
     Optional<Long> getCount();
+    Optional<Long> getCount(String fullName);
 }

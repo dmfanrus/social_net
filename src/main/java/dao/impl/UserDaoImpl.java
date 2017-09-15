@@ -112,7 +112,7 @@ public class UserDaoImpl implements UserDao {
             if (generatedKeys.next()) {
                 return getById(generatedKeys.getLong(1));
             } else {
-                log.warn("Create user returned null with request({},{})",insert,insert.getWarnings());
+                log.warn("Create user returned null with request({},{})", insert, insert.getWarnings());
                 return Optional.empty();
             }
         } catch (SQLException e) {
@@ -182,6 +182,38 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
+    public Optional<List<User>> getUsers(String fullName, long start_num, long counts) {
+        try (Connection connection = dataSource.getConnection()) {
+            final PreparedStatement select = connection.prepareStatement(
+                    "SELECT user_id, user_fullname, user_email, user_gender, user_login, user_dateofbirth " +
+                            "FROM users WHERE user_fullname LIKE ? LIMIT ? OFFSET ?");
+            select.setString(1, '%' + fullName + '%');
+            select.setLong(2, counts);
+            select.setLong(3, start_num);
+            select.executeQuery();
+            final ResultSet resultSet = select.getResultSet();
+            final List<User> users = new ArrayList<>();
+            while (resultSet.next()) {
+                users.add(
+                        User.builder()
+                                .id(resultSet.getLong("user_id"))
+                                .fullName(resultSet.getString("user_fullname"))
+                                .email(resultSet.getString("user_email"))
+                                .gender(Gender.valueOf(resultSet.getString("user_gender")))
+                                .login(resultSet.getString("user_login"))
+                                .dateOfBirth(resultSet.getDate("user_dateofbirth").toLocalDate())
+                                .build());
+            }
+            log.debug("Return array of users[{}]", users.size());
+            return Optional.of(users);
+        } catch (SQLException e) {
+            log.error("Failed to get users by string", e);
+        }
+        log.error("Failed to get DS Connection");
+        return Optional.empty();
+    }
+
+    @Override
     public Optional<Long> getCount() {
         try (Connection connection = dataSource.getConnection()) {
             final PreparedStatement select = connection.prepareStatement(
@@ -189,13 +221,35 @@ public class UserDaoImpl implements UserDao {
                             "FROM users");
             select.executeQuery();
             final ResultSet resultSet = select.getResultSet();
-            if(resultSet.next()) {
+            if (resultSet.next()) {
                 return Optional.of(resultSet.getLong(1));
             } else {
                 return Optional.empty();
             }
         } catch (SQLException e) {
             log.error("Failed to get count of all users", e);
+        }
+        log.error("Failed to get DS Connection");
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Long> getCount(String fullName) {
+        try (Connection connection = dataSource.getConnection()) {
+            final PreparedStatement select = connection.prepareStatement(
+                    "SELECT COUNT(*) " +
+                            "FROM users WHERE user_fullname LIKE ?");
+
+            select.setString(1, '%' + fullName + '%');
+            select.executeQuery();
+            final ResultSet resultSet = select.getResultSet();
+            if (resultSet.next()) {
+                return Optional.of(resultSet.getLong(1));
+            } else {
+                return Optional.empty();
+            }
+        } catch (SQLException e) {
+            log.error("Failed to get count of users with fullname", e);
         }
         log.error("Failed to get DS Connection");
         return Optional.empty();
