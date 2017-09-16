@@ -19,8 +19,12 @@ public class FormValidation {
     private static final String LOGIN_PATTERN =
             "^[A-Za-z][A-Za-z0-9]*?([-_][A-Za-z0-9]+){0,2}$";
 
-    private static final String FULLNAME_PATTERN =
-            "^[a-zA-Zа-яА-ЯёЁ'][a-zA-Z-а-яА-ЯёЁ']+[a-zA-Zа-яА-ЯёЁ']?$";
+    private static final String FIRSTNAME_PATTERN =
+            "([A-Z][a-z]*)|([А-ЯЁ][а-яё]*)";
+
+    private static final String LASTNAME_PATTERN =
+            "([a-zA-z]{1,}['-]?[a-zA-Z]{2,}[ ]?([a-zA-Z]{1,})?)|" +
+                    "([А-ЯЁ][а-яё]+([-][А-ЯЁ][а-яё]+){0,3})";
 
     private Map<String,String> errors = new HashMap<>();
 
@@ -66,13 +70,21 @@ public class FormValidation {
         }
     }
 
-    public void validateFullName(String fullname){
-        if(validateString("fullName",fullname)){
-            if(!fullname.matches(FULLNAME_PATTERN)) {
-                setError("fullName", "fullNameWrong");
+    public void validateFirstName(String name){
+        if(validateString("firstName",name)){
+            if(!name.matches(FIRSTNAME_PATTERN)) {
+                setError("firstName", "firstNameWrong");
             }
         }
     }
+    public void validateLastName(String name){
+        if(validateString("lastName",name)){
+            if(!name.matches(LASTNAME_PATTERN)) {
+                setError("lastName", "lastNameWrong");
+            }
+        }
+    }
+
 
     public void validateDate(String dateOfBirth){
         if(validateString("dateOfBirth",dateOfBirth)) {

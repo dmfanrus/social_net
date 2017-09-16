@@ -45,20 +45,20 @@
                     <div class="col-lg-1"></div>
                     <div class="col-lg-7">
                         <input class="form-control"
-                               placeholder="<fmt:message bundle="${registration}" key="registration.fullName"/>"
-                               id="fullName" name="fullName" value="<c:out value="${fields['fullName']}"/>">
+                               placeholder="<fmt:message bundle="${registration}" key="registration.firstName"/>"
+                               id="firstName" name="firstName" value="<c:out value="${fields['firstName']}"/>">
                     </div>
                     <c:choose>
-                        <c:when test="${not empty errors['fullName']}">
+                        <c:when test="${not empty errors['firstName']}">
                             <div class="col-lg-4-offset has-error">
                                 <label class=" control-label" style="text-align: left">
                                     <span class="glyphicon glyphicon-remove"></span><fmt:message
                                         bundle="${errorsMessage}"
-                                        key="errorsMessage.${errors['fullName']}"/></label>
+                                        key="errorsMessage.${errors['firstName']}"/></label>
                             </div>
                         </c:when>
                         <c:otherwise>
-                            <c:if test="${not empty fields.fullName}">
+                            <c:if test="${not empty fields.firstName}">
                                 <div class="col-lg-4-offset has-success">
                                     <label class=" control-label" style="text-align: left">
                                         <span class="glyphicon glyphicon-ok"></span></label>
@@ -67,26 +67,25 @@
                         </c:otherwise>
                     </c:choose>
                 </div>
-
 
                 <div class="form-group">
                     <div class="col-lg-1"></div>
                     <div class="col-lg-7">
-                        <input type="email" class="form-control"
-                               placeholder="<fmt:message bundle="${registration}" key="registration.email"/>"
-                               id="email" name="email" value="<c:out value="${fields['email']}"/>">
+                        <input class="form-control"
+                               placeholder="<fmt:message bundle="${registration}" key="registration.lastName"/>"
+                               id="lastName" name="lastName" value="<c:out value="${fields['lastName']}"/>">
                     </div>
                     <c:choose>
-                        <c:when test="${not empty errors['email']}">
+                        <c:when test="${not empty errors['lastName']}">
                             <div class="col-lg-4-offset has-error">
                                 <label class=" control-label" style="text-align: left">
                                     <span class="glyphicon glyphicon-remove"></span><fmt:message
                                         bundle="${errorsMessage}"
-                                        key="errorsMessage.${errors['email']}"/></label>
+                                        key="errorsMessage.${errors['lastName']}"/></label>
                             </div>
                         </c:when>
                         <c:otherwise>
-                            <c:if test="${not empty fields.email}">
+                            <c:if test="${not empty fields.lastName}">
                                 <div class="col-lg-4-offset has-success">
                                     <label class=" control-label" style="text-align: left">
                                         <span class="glyphicon glyphicon-ok"></span></label>
@@ -95,7 +94,6 @@
                         </c:otherwise>
                     </c:choose>
                 </div>
-
 
                 <div class="form-group">
                     <div class="col-lg-1"></div>
@@ -143,6 +141,33 @@
                     </c:choose>
                 </div>
 
+
+                <div class="form-group">
+                    <div class="col-lg-1"></div>
+                    <div class="col-lg-7">
+                        <input type="email" class="form-control"
+                               placeholder="<fmt:message bundle="${registration}" key="registration.email"/>"
+                               id="email" name="email" value="<c:out value="${fields['email']}"/>">
+                    </div>
+                    <c:choose>
+                        <c:when test="${not empty errors['email']}">
+                            <div class="col-lg-4-offset has-error">
+                                <label class=" control-label" style="text-align: left">
+                                    <span class="glyphicon glyphicon-remove"></span><fmt:message
+                                        bundle="${errorsMessage}"
+                                        key="errorsMessage.${errors['email']}"/></label>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <c:if test="${not empty fields.email}">
+                                <div class="col-lg-4-offset has-success">
+                                    <label class=" control-label" style="text-align: left">
+                                        <span class="glyphicon glyphicon-ok"></span></label>
+                                </div>
+                            </c:if>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
 
                 <div class="form-group">
                     <div class="col-lg-1"></div>

@@ -4,9 +4,7 @@ import model.Gender;
 import model.User;
 import org.junit.Before;
 import org.junit.Test;
-import service.SecurityService;
 import service.UserService;
-import service.impl.SecurityServiceImpl;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -16,7 +14,6 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,22 +30,24 @@ public class UsersServletTest {
     private final Long countPages = 6L;
 
     @Before
-    public void initValues(){
+    public void initValues() {
         user = User.builder()
-                .fullName("Test Test Test")
+                .firstName("testFirstName")
+                .lastName("testLastName")
                 .login("testLogin")
                 .gender(Gender.MALE)
                 .email("test.test@test.test")
-                .dateOfBirth(LocalDate.of(1995,11,11))
+                .dateOfBirth(LocalDate.of(1995, 11, 11))
                 .build();
-        for(int i=0;i<6;i++)
+        for (int i = 0; i < 6; i++)
             users.add(User.builder()
-                .fullName("Test Test Test")
-                .login("testLogin")
-                .gender(Gender.MALE)
-                .email("test.test@test.test")
-                .dateOfBirth(LocalDate.of(1995,11,11))
-                .build());
+                    .firstName("testFirstName")
+                    .lastName("testLastName")
+                    .login("testLogin")
+                    .gender(Gender.MALE)
+                    .email("test.test@test.test")
+                    .dateOfBirth(LocalDate.of(1995, 11, 11))
+                    .build());
     }
 
     @Test
@@ -58,26 +57,25 @@ public class UsersServletTest {
         final HttpServletRequest req = mock(HttpServletRequest.class);
         final HttpServletResponse resp = mock(HttpServletResponse.class);
         final HttpSession session = mock(HttpSession.class);
-        final UsersServlet usersServlet  = new UsersServlet(userService);
+        final UsersServlet usersServlet = new UsersServlet(userService);
 
         when(req.getSession(false)).thenReturn(session);
         when(session.getAttribute("user")).thenReturn(user);
         when(req.getParameter("page")).thenReturn(null);
-        when(req.getParameter("countPages")).thenReturn(null);
         when(req.getParameter("fullName")).thenReturn(null);
-        when(userService.getCount()).thenReturn(Optional.of(countUsers));
-        when(userService.getUsers(0,countUsersOnPage)).thenReturn(Optional.of(users));
+        when(userService.getCount(null)).thenReturn(Optional.of(countUsers));
+        when(userService.getUsers(null, 0, countUsersOnPage)).thenReturn(Optional.of(users));
         when(req.getRequestDispatcher("/WEB-INF/users.jsp")).thenReturn(dispatcher);
 
-        usersServlet.doGet(req,resp);
+        usersServlet.doGet(req, resp);
 
-        verify(req).setAttribute("countPages",countPages);
-        verify(req).setAttribute("page",1L);
-        verify(req).setAttribute("startPage",1L);
-        verify(req).setAttribute("endPage",5L);
-        verify(req).setAttribute("usersList",users);
+        verify(req).setAttribute("countPages", countPages);
+        verify(req).setAttribute("page", 1L);
+        verify(req).setAttribute("startPage", 1L);
+        verify(req).setAttribute("endPage", 5L);
+        verify(req).setAttribute("usersList", users);
         verify(resp).setStatus(HttpServletResponse.SC_OK);
-        verify(dispatcher).forward(req,resp);
+        verify(dispatcher).forward(req, resp);
     }
 
     @Test
@@ -87,29 +85,27 @@ public class UsersServletTest {
         final HttpServletRequest req = mock(HttpServletRequest.class);
         final HttpServletResponse resp = mock(HttpServletResponse.class);
         final HttpSession session = mock(HttpSession.class);
-        final UsersServlet usersServlet  = new UsersServlet(userService);
+        final UsersServlet usersServlet = new UsersServlet(userService);
 
 
         when(req.getSession(false)).thenReturn(session);
         when(session.getAttribute("user")).thenReturn(user);
         when(req.getParameter("page")).thenReturn("2");
-        when(req.getParameter("countPages")).thenReturn(Long.toString(countPages));
         when(req.getParameter("fullName")).thenReturn(null);
-        when(userService.getCount()).thenReturn(Optional.of(countUsers));
-        when(userService.getUsers(10,countUsersOnPage)).thenReturn(Optional.of(users));
+        when(userService.getCount(null)).thenReturn(Optional.of(countUsers));
+        when(userService.getUsers(null, 10, countUsersOnPage)).thenReturn(Optional.of(users));
         when(req.getRequestDispatcher("/WEB-INF/users.jsp")).thenReturn(dispatcher);
 
-        usersServlet.doGet(req,resp);
+        usersServlet.doGet(req, resp);
 
-        verify(req).setAttribute("countPages",countPages);
-        verify(req).setAttribute("page",2L);
-        verify(req).setAttribute("startPage",1L);
-        verify(req).setAttribute("endPage",5L);
-        verify(req).setAttribute("usersList",users);
+        verify(req).setAttribute("countPages", countPages);
+        verify(req).setAttribute("page", 2L);
+        verify(req).setAttribute("startPage", 1L);
+        verify(req).setAttribute("endPage", 5L);
+        verify(req).setAttribute("usersList", users);
         verify(resp).setStatus(HttpServletResponse.SC_OK);
-        verify(dispatcher).forward(req,resp);
+        verify(dispatcher).forward(req, resp);
     }
-
 
 
     @Test
@@ -119,20 +115,19 @@ public class UsersServletTest {
         final HttpServletRequest req = mock(HttpServletRequest.class);
         final HttpServletResponse resp = mock(HttpServletResponse.class);
         final HttpSession session = mock(HttpSession.class);
-        final UsersServlet usersServlet  = new UsersServlet(userService);
+        final UsersServlet usersServlet = new UsersServlet(userService);
 
         when(req.getSession(false)).thenReturn(session);
         when(session.getAttribute("user")).thenReturn(user);
         when(req.getParameter("page")).thenReturn("20");
-        when(req.getParameter("countPages")).thenReturn(Long.toString(countPages));
         when(req.getParameter("fullName")).thenReturn(null);
-        when(userService.getCount()).thenReturn(Optional.of(countUsers));
+        when(userService.getCount(null)).thenReturn(Optional.of(countUsers));
         when(req.getRequestDispatcher("/WEB-INF/not_found.jsp")).thenReturn(dispatcher);
 
-        usersServlet.doGet(req,resp);
+        usersServlet.doGet(req, resp);
 
         verify(resp).setStatus(HttpServletResponse.SC_NOT_FOUND);
-        verify(dispatcher).forward(req,resp);
+        verify(dispatcher).forward(req, resp);
     }
 
     @Test
@@ -142,17 +137,17 @@ public class UsersServletTest {
         final HttpServletRequest req = mock(HttpServletRequest.class);
         final HttpServletResponse resp = mock(HttpServletResponse.class);
         final HttpSession session = mock(HttpSession.class);
-        final UsersServlet usersServlet  = new UsersServlet(userService);
+        final UsersServlet usersServlet = new UsersServlet(userService);
 
         when(req.getSession(false)).thenReturn(session);
         when(session.getAttribute("user")).thenReturn(user);
-        when(userService.getCount()).thenReturn(Optional.empty());
+        when(userService.getCount(null)).thenReturn(Optional.empty());
         when(req.getRequestDispatcher("/WEB-INF/error.jsp")).thenReturn(dispatcher);
 
-        usersServlet.doGet(req,resp);
+        usersServlet.doGet(req, resp);
 
         verify(resp).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        verify(dispatcher).forward(req,resp);
+        verify(dispatcher).forward(req, resp);
     }
 
     @Test
@@ -162,21 +157,21 @@ public class UsersServletTest {
         final HttpServletRequest req = mock(HttpServletRequest.class);
         final HttpServletResponse resp = mock(HttpServletResponse.class);
         final HttpSession session = mock(HttpSession.class);
-        final UsersServlet usersServlet  = new UsersServlet(userService);
+        final UsersServlet usersServlet = new UsersServlet(userService);
 
         when(req.getSession(false)).thenReturn(session);
         when(session.getAttribute("user")).thenReturn(user);
         when(req.getParameter("fullName")).thenReturn(null);
         when(req.getParameter("page")).thenReturn("3");
         when(req.getParameter("countPages")).thenReturn(Long.toString(countPages));
-        when(userService.getCount()).thenReturn(Optional.of(countUsers));
-        when(userService.getUsers(30,countUsersOnPage)).thenReturn(Optional.empty());
+        when(userService.getCount(null)).thenReturn(Optional.of(countUsers));
+        when(userService.getUsers(null,30, countUsersOnPage)).thenReturn(Optional.empty());
         when(req.getRequestDispatcher("/WEB-INF/error.jsp")).thenReturn(dispatcher);
 
-        usersServlet.doGet(req,resp);
+        usersServlet.doGet(req, resp);
 
         verify(resp).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        verify(dispatcher).forward(req,resp);
+        verify(dispatcher).forward(req, resp);
     }
 
     @Test
@@ -186,20 +181,19 @@ public class UsersServletTest {
         final HttpServletRequest req = mock(HttpServletRequest.class);
         final HttpServletResponse resp = mock(HttpServletResponse.class);
         final HttpSession session = mock(HttpSession.class);
-        final UsersServlet usersServlet  = new UsersServlet(userService);
+        final UsersServlet usersServlet = new UsersServlet(userService);
 
         when(req.getSession(false)).thenReturn(session);
         when(session.getAttribute("user")).thenReturn(user);
         when(req.getParameter("page")).thenReturn("0");
-        when(req.getParameter("countPages")).thenReturn(Long.toString(countPages));
         when(req.getParameter("fullName")).thenReturn(null);
-        when(userService.getCount()).thenReturn(Optional.of(countUsers));
+        when(userService.getCount(null)).thenReturn(Optional.of(countUsers));
         when(req.getRequestDispatcher("/WEB-INF/not_found.jsp")).thenReturn(dispatcher);
 
-        usersServlet.doGet(req,resp);
+        usersServlet.doGet(req, resp);
 
         verify(resp).setStatus(HttpServletResponse.SC_NOT_FOUND);
-        verify(dispatcher).forward(req,resp);
+        verify(dispatcher).forward(req, resp);
     }
 
     @Test
@@ -209,25 +203,25 @@ public class UsersServletTest {
         final HttpServletRequest req = mock(HttpServletRequest.class);
         final HttpServletResponse resp = mock(HttpServletResponse.class);
         final HttpSession session = mock(HttpSession.class);
-        final UsersServlet usersServlet  = new UsersServlet(userService);
+        final UsersServlet usersServlet = new UsersServlet(userService);
 
         when(req.getSession(false)).thenReturn(session);
         when(session.getAttribute("user")).thenReturn(user);
         when(req.getParameter("fullName")).thenReturn("Mihail");
         when(userService.getCount("Mihail")).thenReturn(Optional.of(countUsers));
-        when(userService.getUsers("Mihail",0,countUsersOnPage)).thenReturn(Optional.of(users));
+        when(userService.getUsers("Mihail", 0, countUsersOnPage)).thenReturn(Optional.of(users));
         when(req.getRequestDispatcher("/WEB-INF/users.jsp")).thenReturn(dispatcher);
 
-        usersServlet.doPost(req,resp);
+        usersServlet.doPost(req, resp);
 
-        verify(req).setAttribute("countPages",countPages);
-        verify(req).setAttribute("page",1L);
-        verify(req).setAttribute("startPage",1L);
-        verify(req).setAttribute("endPage",5L);
-        verify(req).setAttribute("usersList",users);
-        verify(req).setAttribute("fullName","Mihail");
+        verify(req).setAttribute("countPages", countPages);
+        verify(req).setAttribute("page", 1L);
+        verify(req).setAttribute("startPage", 1L);
+        verify(req).setAttribute("endPage", 5L);
+        verify(req).setAttribute("usersList", users);
+        verify(req).setAttribute("fullName", "Mihail");
         verify(resp).setStatus(HttpServletResponse.SC_OK);
-        verify(dispatcher).forward(req,resp);
+        verify(dispatcher).forward(req, resp);
     }
 
     @Test
@@ -237,24 +231,23 @@ public class UsersServletTest {
         final HttpServletRequest req = mock(HttpServletRequest.class);
         final HttpServletResponse resp = mock(HttpServletResponse.class);
         final HttpSession session = mock(HttpSession.class);
-        final UsersServlet usersServlet  = new UsersServlet(userService);
+        final UsersServlet usersServlet = new UsersServlet(userService);
 
         when(req.getSession(false)).thenReturn(session);
         when(session.getAttribute("user")).thenReturn(user);
         when(req.getParameter("fullName")).thenReturn("");
-        when(req.getParameter("page")).thenReturn("2");
-        when(req.getParameter("countPages")).thenReturn(Long.toString(countPages));
-        when(userService.getUsers(10,countUsersOnPage)).thenReturn(Optional.of(users));
+        when(userService.getCount("")).thenReturn(Optional.of(countUsers));
+        when(userService.getUsers("", 0, countUsersOnPage)).thenReturn(Optional.of(users));
         when(req.getRequestDispatcher("/WEB-INF/users.jsp")).thenReturn(dispatcher);
 
-        usersServlet.doPost(req,resp);
+        usersServlet.doPost(req, resp);
 
-        verify(req).setAttribute("countPages",countPages);
-        verify(req).setAttribute("page",2L);
-        verify(req).setAttribute("startPage",1L);
-        verify(req).setAttribute("endPage",5L);
-        verify(req).setAttribute("usersList",users);
+        verify(req).setAttribute("countPages", countPages);
+        verify(req).setAttribute("page", 1L);
+        verify(req).setAttribute("startPage", 1L);
+        verify(req).setAttribute("endPage", 5L);
+        verify(req).setAttribute("usersList", users);
         verify(resp).setStatus(HttpServletResponse.SC_OK);
-        verify(dispatcher).forward(req,resp);
+        verify(dispatcher).forward(req, resp);
     }
 }

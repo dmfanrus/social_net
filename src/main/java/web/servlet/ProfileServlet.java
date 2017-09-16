@@ -27,6 +27,5 @@ public class ProfileServlet extends HelpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         log.debug("POST");
-
     }
 }

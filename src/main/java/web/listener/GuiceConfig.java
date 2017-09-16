@@ -1,12 +1,16 @@
 package web.listener;
 
+import dao.FriendDao;
 import dao.UserDao;
+import dao.impl.FriendDaoImpl;
 import dao.impl.UserDaoImpl;
 import db.PgConfig;
 import db.PgConfigProvider;
 import db.PostgreDataSourceProvider;
+import service.FriendService;
 import service.SecurityService;
 import service.UserService;
+import service.impl.FriendServiceImpl;
 import service.impl.SecurityServiceImpl;
 import service.impl.UserServiceImpl;
 import web.filter.LoggedInFilter;
@@ -38,10 +42,11 @@ public class GuiceConfig extends GuiceServletContextListener {
     private static class DependancyModule extends AbstractModule {
         @Override
         protected void configure() {
-            bind(UserService.class).to(UserServiceImpl.class).in(Singleton.class);
             bind(UserDao.class).to(UserDaoImpl.class).in(Singleton.class);
-            bind(SecurityService.class).to(SecurityServiceImpl.class).in(Singleton.class);
+            bind(FriendDao.class).to(FriendDaoImpl.class).in(Singleton.class);
             bind(UserService.class).to(UserServiceImpl.class).in(Singleton.class);
+            bind(FriendService.class).to(FriendServiceImpl.class).in(Singleton.class);
+            bind(SecurityService.class).to(SecurityServiceImpl.class).in(Singleton.class);
         }
     }
 

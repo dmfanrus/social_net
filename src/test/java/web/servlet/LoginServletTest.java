@@ -5,7 +5,6 @@ import model.Gender;
 import model.User;
 import org.junit.Test;
 import service.UserService;
-import web.servlet.utils.FormValidation;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -29,7 +28,8 @@ public class LoginServletTest {
         final UserService userService = mock(UserService.class);
         final Credentials credentials = Credentials.builder().login("testLogin").password("testPassword").build();
         final Optional<User> user = Optional.of(User.builder()
-                .fullName("Test Test Test")
+                .firstName("testFirstName")
+                .lastName("testLastName")
                 .login("testLogin")
                 .gender(Gender.MALE)
                 .email("test.test@test.test")

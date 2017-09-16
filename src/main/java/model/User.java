@@ -9,19 +9,16 @@ import java.time.LocalDate;
 @Builder
 public class User{
     long id;
-    String fullName;
+    String firstName;
+    String lastName;
     String email;
     String login;
-    String hashPassword;
+    String password;
     LocalDate dateOfBirth;
     Gender gender;
 
     public long getId() {
         return id;
-    }
-
-    public String getFullName() {
-        return fullName;
     }
 
     public String getEmail() {
@@ -32,8 +29,8 @@ public class User{
         return login;
     }
 
-    public String getHashPassword() {
-        return hashPassword;
+    public String getPassword() {
+        return password;
     }
 
     public LocalDate getDateOfBirth() {
@@ -44,14 +41,23 @@ public class User{
         return gender;
     }
 
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
     @Override
     public String toString() {
         return "User{" +
                 "id=" + id +
-                ", fullName='" + fullName + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
                 ", login='" + login + '\'' +
-                ", hashPassword='" + hashPassword + '\'' +
+                ", password='" + password + '\'' +
                 ", dateOfBirth=" + dateOfBirth +
                 ", gender=" + gender +
                 '}';

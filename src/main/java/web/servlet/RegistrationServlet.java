@@ -43,19 +43,21 @@ public class RegistrationServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
         log.debug("POST");
-        log.debug("Parameters: FullName-[{}] Email-[{}] Birthday-[{}] Gender-[{}] Login-[{}]",
-                req.getParameter("fullName"),
+        log.debug("Parameters: FirstName-[{}] LastName-[{}] Login-[{}] Email-[{}] Birthday-[{}] Gender-[{}]",
+                req.getParameter("firstName"),
+                req.getParameter("lastName"),
+                req.getParameter("username"),
                 req.getParameter("email"),
                 req.getParameter("dateOfBirth"),
-                req.getParameter("gender"),
-                req.getParameter("username"));
+                req.getParameter("gender"));
         log.debug("Availably of user in session: {}",req.getSession(false).getAttribute("user"));
 
         HashMap<String, String> fields = new HashMap<>();
-        fields.put("fullName", req.getParameter("fullName"));
-        fields.put("email", req.getParameter("email"));
+        fields.put("firstName", req.getParameter("firstName"));
+        fields.put("lastName", req.getParameter("lastName"));
         fields.put("login", req.getParameter("username"));
         fields.put("password", req.getParameter("password"));
+        fields.put("email", req.getParameter("email"));
         fields.put("dateOfBirth", req.getParameter("dateOfBirth"));
         fields.put("gender", req.getParameter("gender"));
 
@@ -63,10 +65,12 @@ public class RegistrationServlet extends HttpServlet {
 
         if (validate.isValid()) {
             log.debug("Form fields is valid");
-            User userIn = User.builder().fullName(fields.get("fullName"))
-                    .email(fields.get("email"))
+            User userIn = User.builder()
+                    .firstName(fields.get("firstName"))
+                    .lastName(fields.get("lastName"))
                     .login(fields.get("login"))
-                    .hashPassword(securityService.encrypt(fields.get("password")))
+                    .email(fields.get("email"))
+                    .password(securityService.encrypt(fields.get("password")))
                     .dateOfBirth(LocalDate.parse(fields.get("dateOfBirth")))
                     .gender(fields.get("gender").equals("M") ? Gender.MALE : Gender.FEMALE)
                     .build();
@@ -79,9 +83,6 @@ public class RegistrationServlet extends HttpServlet {
                 resp.sendRedirect(req.getContextPath() + "/profile");
                 return;
             } else {
-                /*
-                 * Как вариант, перенаправлять на страницу ошибки
-                 */
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 req.getRequestDispatcher("/WEB-INF/error.jsp").forward(req, resp);
                 return;
@@ -97,7 +98,8 @@ public class RegistrationServlet extends HttpServlet {
 
     private FormValidation formValidation(HashMap<String, String> fields) {
         FormValidation validate = new FormValidation();
-        validate.validateFullName(fields.get("fullName"));
+        validate.validateFirstName(fields.get(("firstName")));
+        validate.validateLastName(fields.get(("lastName")));
         validate.validateEmail(fields.get("email"));
         validate.validateCredentials(Credentials.builder().login(fields.get("login")).password(fields.get("password")).build());
         validate.validateDate(fields.get("dateOfBirth"));

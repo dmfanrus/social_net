@@ -14,11 +14,10 @@
 <fmt:message var="title" bundle="${profile}" key="profile.title"/>
 
 <tags:user title="${title}">
-    <h2>ID User: ${user.id}</h2>
-    <h2>Full Name: ${user.fullName}</h2>
-    <h2>Gender: ${user.gender}</h2>
-    <h2>Date of birth: ${user.dateOfBirth}</h2>
-    <h2>Email: ${user.email}</h2>
+    <h2>User ID: ${user.id}</h2>
+    <h2>Name: ${user.lastName} ${user.firstName}</h2>
     <h2>Login: ${user.login}</h2>
-    <h2>Hash password: ${user.hashPassword}</h2>
+    <h2>Email: ${user.email}</h2>
+    <h2>Date of birth: ${user.dateOfBirth}</h2>
+    <h2>Gender: ${user.gender}</h2>
 </tags:user>

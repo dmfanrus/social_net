@@ -27,18 +27,20 @@ public class UserServiceTest {
         UserService userService = new UserServiceImpl(userDao,securityService);
 
         User userIn = User.builder()
-                .fullName("testFullName")
+                .firstName("testFirstName")
+                .lastName("testLastName")
                 .login("testLogin")
-                .hashPassword(securityService.encrypt("testPassword"))
+                .password(securityService.encrypt("testPassword"))
                 .dateOfBirth(LocalDate.of(1998,11,19))
                 .gender(Gender.MALE)
                 .build();
 
         Optional<User> userOut = Optional.of(User.builder()
                 .id(100)
-                .fullName("testFullName")
+                .firstName("testFirstName")
+                .lastName("testLastName")
                 .login("testLogin")
-                .hashPassword(securityService.encrypt("testPassword"))
+                .password(securityService.encrypt("testPassword"))
                 .dateOfBirth(LocalDate.of(1998,11,19))
                 .gender(Gender.MALE)
                 .build());
@@ -61,9 +63,10 @@ public class UserServiceTest {
 
         Optional<User> userOut = Optional.of(User.builder()
                 .id(100)
-                .fullName("testFullName")
+                .firstName("testFirstName")
+                .lastName("testLastName")
                 .login("testLogin")
-                .hashPassword(securityService.encrypt("testPassword"))
+                .password(securityService.encrypt("testPassword"))
                 .dateOfBirth(LocalDate.of(1998,11,19))
                 .gender(Gender.MALE)
                 .build());
@@ -86,9 +89,10 @@ public class UserServiceTest {
 
         Optional<User> userOut = Optional.of(User.builder()
                 .id(100)
-                .fullName("testFullName")
+                .firstName("testFirstName")
+                .lastName("testLastName")
                 .login("testLogin")
-                .hashPassword(securityService.encrypt("testPassword"))
+                .password(securityService.encrypt("testPassword"))
                 .dateOfBirth(LocalDate.of(1998,11,19))
                 .gender(Gender.MALE)
                 .build());

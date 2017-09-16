@@ -1,6 +1,5 @@
 package web.servlet;
 
-import model.Credentials;
 import model.Gender;
 import model.User;
 import org.junit.Test;
@@ -18,7 +17,6 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,7 +32,8 @@ public class RegistrationServletTest {
         final HttpSession session = mock(HttpSession.class);
         final RegistrationServlet registrationServlet = new RegistrationServlet(userService,securityService);
 
-        when(req.getParameter("fullName")).thenReturn("testFullName");
+        when(req.getParameter("firstName")).thenReturn("Testfirstname");
+        when(req.getParameter("lastName")).thenReturn("Testlastname");
         when(req.getParameter("username")).thenReturn("testLogin");
         when(req.getParameter("password")).thenReturn("testPassword");
         when(req.getParameter("email")).thenReturn("test.test@test.test");
@@ -42,28 +41,22 @@ public class RegistrationServletTest {
         when(req.getParameter("gender")).thenReturn("M");
         when(req.getSession(false)).thenReturn(session);
 
-        final HashMap<String,String> fields = new HashMap<>();
-        fields.put("fullName","testFullName");
-        fields.put("login","testLogin");
-        fields.put("password","testPassword");
-        fields.put("email","test.test@test.test");
-        fields.put("dateOfBirth","1995-11-11");
-        fields.put("gender","M");
-
         final User userIn = User.builder()
-                .fullName("testFullName")
+                .firstName("Testfirstname")
+                .lastName("Testlastname")
                 .login("testLogin")
                 .email("test.test@test.test")
-                .hashPassword(securityService.encrypt("testPassword"))
+                .password(securityService.encrypt("testPassword"))
                 .dateOfBirth(LocalDate.parse("1995-11-11"))
                 .gender(Gender.MALE)
                 .build();
         final Optional<User> userOut = Optional.of(User.builder()
                 .id(1)
-                .fullName("testFullName")
+                .firstName("Testfirstname")
+                .lastName("Testlastname")
                 .login("testLogin")
                 .email("test.test@test.test")
-                .hashPassword(securityService.encrypt("testPassword"))
+                .password(securityService.encrypt("testPassword"))
                 .dateOfBirth(LocalDate.parse("1995-11-11"))
                 .gender(Gender.MALE)
                 .build());
@@ -89,7 +82,8 @@ public class RegistrationServletTest {
         final HashMap<String,String> errors = new HashMap<>();
         final RegistrationServlet registrationServlet = new RegistrationServlet(userService,securityService);
 
-        when(req.getParameter("fullName")).thenReturn("testFullName");
+        when(req.getParameter("firstName")).thenReturn("Testfirstname");
+        when(req.getParameter("lastName")).thenReturn("Testlastname");
         when(req.getParameter("username")).thenReturn("testExistingLogin");
         when(req.getParameter("password")).thenReturn("testPassword");
         when(req.getParameter("email")).thenReturn("test.test@test.test");
@@ -100,7 +94,8 @@ public class RegistrationServletTest {
 
 
         final HashMap<String,String> fields = new HashMap<>();
-        fields.put("fullName","testFullName");
+        fields.put("firstName","Testfirstname");
+        fields.put("lastName","Testlastname");
         fields.put("login","testExistingLogin");
         fields.put("password","testPassword");
         fields.put("email","test.test@test.test");
@@ -128,7 +123,8 @@ public class RegistrationServletTest {
         final HashMap<String,String> errors = new HashMap<>();
         final RegistrationServlet registrationServlet = new RegistrationServlet(userService,securityService);
 
-        when(req.getParameter("fullName")).thenReturn("testFullName");
+        when(req.getParameter("firstName")).thenReturn("Testfirstname");
+        when(req.getParameter("lastName")).thenReturn("Testlastname");
         when(req.getParameter("username")).thenReturn("111testLogin");
         when(req.getParameter("password")).thenReturn("");
         when(req.getParameter("email")).thenReturn("test.test.test.test");
@@ -138,7 +134,8 @@ public class RegistrationServletTest {
 
 
         final HashMap<String,String> fields = new HashMap<>();
-        fields.put("fullName","testFullName");
+        fields.put("firstName","Testfirstname");
+        fields.put("lastName","Testlastname");
         fields.put("login","111testLogin");
         fields.put("password","");
         fields.put("email","test.test.test.test");
@@ -168,7 +165,8 @@ public class RegistrationServletTest {
         final HttpSession session = mock(HttpSession.class);
         final RegistrationServlet registrationServlet = new RegistrationServlet(userService,securityService);
 
-        when(req.getParameter("fullName")).thenReturn("testFullName");
+        when(req.getParameter("firstName")).thenReturn("Testfirstname");
+        when(req.getParameter("lastName")).thenReturn("Testlastname");
         when(req.getParameter("username")).thenReturn("testLogin");
         when(req.getParameter("password")).thenReturn("testPassword");
         when(req.getParameter("email")).thenReturn("test.test@test.test");
@@ -176,19 +174,12 @@ public class RegistrationServletTest {
         when(req.getParameter("gender")).thenReturn("M");
         when(req.getSession(false)).thenReturn(session);
 
-        final HashMap<String,String> fields = new HashMap<>();
-        fields.put("fullName","testFullName");
-        fields.put("login","testLogin");
-        fields.put("password","testPassword");
-        fields.put("email","test.test@test.test");
-        fields.put("dateOfBirth","1995-11-11");
-        fields.put("gender","M");
-
         final User userIn = User.builder()
-                .fullName("testFullName")
+                .firstName("Testfirstname")
+                .lastName("Testlastname")
                 .login("testLogin")
                 .email("test.test@test.test")
-                .hashPassword(securityService.encrypt("testPassword"))
+                .password(securityService.encrypt("testPassword"))
                 .dateOfBirth(LocalDate.parse("1995-11-11"))
                 .gender(Gender.MALE)
                 .build();
