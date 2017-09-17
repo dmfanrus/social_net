@@ -25,7 +25,7 @@ public class FriendDaoImpl implements FriendDao{
     }
 
     @Override
-    public List<Optional<User>> getAllFriends(long currentUserID) {
+    public List<Optional<User>> getFriends(long currentUserID) {
         try (Connection connection = dataSource.getConnection()) {
             final PreparedStatement select = connection.prepareStatement(
                     "SELECT user_id, user_firstname, user_lastname, user_login, user_email, user_dateofbirth, user_gender " +

@@ -12,14 +12,12 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import static junit.framework.Assert.assertEquals;
 
 public class UserServiceTest {
 
-    //Бессмысленный тест
     @Test
     public void testCreateUser(){
         UserDao userDao = mock(UserDao.class);
@@ -49,7 +47,6 @@ public class UserServiceTest {
         assertEquals(userOut,userService.createUser(userIn));
     }
 
-    //Бессмысленный тест
     @Test
     public void testGetByCredentials(){
         UserDao userDao = mock(UserDao.class);

@@ -37,13 +37,27 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Optional<User> getByCredentials(Credentials credentials) {
+        Optional<User> user = userDao.getByLogin(credentials.getLogin());
+        if (user.isPresent() && securityService.validate(credentials.getPassword(), user.get().getPassword())) {
+            return user;
+        }
+        return Optional.empty();
+    }
+
+    @Override
     public boolean checkExistByLogin(String login) {
         return userDao.getByLogin(login).isPresent();
     }
 
     @Override
-    public List<Optional<User>> getAllUsers() {
-        return userDao.getAllUsers();
+    public Optional<List<User>> getUsers() {
+        return userDao.getUsers();
+    }
+
+    @Override
+    public Optional<Long> getCount() {
+        return userDao.getCount();
     }
 
     @Override
@@ -62,6 +76,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+
     @Override
     public Optional<List<User>> getUsers(String fullName, long start_num, long counts) {
         if (fullName != null && !fullName.isEmpty()) {
@@ -74,16 +89,8 @@ public class UserServiceImpl implements UserService {
                 return Optional.empty();
             }
         } else {
-            return userDao.getUsers(start_num,counts);
+            return userDao.getUsers(start_num, counts);
         }
     }
 
-    @Override
-    public Optional<User> getByCredentials(Credentials credentials) {
-        Optional<User> user = userDao.getByLogin(credentials.getLogin());
-        if (user.isPresent() && securityService.validate(credentials.getPassword(), user.get().getPassword())) {
-            return user;
-        }
-        return Optional.empty();
-    }
 }

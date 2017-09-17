@@ -93,7 +93,7 @@ public class UsersServlet extends HttpServlet {
                 req.setAttribute("countPages", countPages);
                 req.setAttribute("page", currentPage);
                 resp.setStatus(HttpServletResponse.SC_OK);
-                log.debug("GET - countPages={}  currentPage={}", countPages, currentPage);
+                log.debug("POST - countPages={}  currentPage={}", countPages, currentPage);
                 req.getRequestDispatcher("/WEB-INF/users.jsp")
                         .forward(req, resp);
             } else {

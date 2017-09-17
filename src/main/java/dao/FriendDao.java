@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface FriendDao {
-    List<Optional<User>> getAllFriends(long currentUserID);
+    List<Optional<User>> getFriends(long currentUserID);
     Optional<List<User>> getFriends(long currentUserID, long start_num,long counts);
     Optional<List<User>> getFriends(long currentUserID, String name, long start_num, long counts);
     Optional<List<User>> getFriends(long currentUserID, String firstName, String lastName, long start_num, long counts);

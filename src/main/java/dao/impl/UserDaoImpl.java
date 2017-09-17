@@ -4,14 +4,10 @@ import dao.UserDao;
 //import model.Gender;
 import model.Gender;
 import model.User;
-import service.SecurityService;
 import com.google.inject.Inject;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -125,16 +121,16 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public List<Optional<User>> getAllUsers() {
+    public Optional<List<User>> getUsers() {
         try (Connection connection = dataSource.getConnection()) {
             final PreparedStatement select = connection.prepareStatement(
                     "SELECT user_id, user_firstname, user_lastname, user_login, user_email, user_dateofbirth, user_gender " +
                             "FROM users");
             select.executeQuery();
             final ResultSet resultSet = select.getResultSet();
-            final List<Optional<User>> users = new ArrayList<>();
+            final List<User> users = new ArrayList<>();
             while (resultSet.next()) {
-                users.add(Optional.of(
+                users.add(
                         User.builder()
                                 .id(resultSet.getLong(1))
                                 .firstName(resultSet.getString(2))
@@ -143,14 +139,14 @@ public class UserDaoImpl implements UserDao {
                                 .email(resultSet.getString(5))
                                 .dateOfBirth(resultSet.getDate(6).toLocalDate())
                                 .gender(Gender.valueOf(resultSet.getString(7)))
-                                .build()));
+                                .build());
             }
-            return users;
+            return Optional.of(users);
         } catch (SQLException e) {
             log.error("Failed to get all users", e);
         }
         log.error("Failed to get DS Connection");
-        return new ArrayList<>();
+        return Optional.empty();
     }
 
     @Override

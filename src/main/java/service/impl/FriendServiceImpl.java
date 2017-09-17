@@ -18,26 +18,15 @@ public class FriendServiceImpl implements FriendService{
     }
 
     @Override
-    public List<Optional<User>> getAllFriends(long currentUserID) {
-        return friendDao.getAllFriends(currentUserID);
+    public Optional<Long> getCount(long currentUserID) {
+        return friendDao.getCount(currentUserID);
     }
-
 
     @Override
-    public Optional<List<User>> getFriends(long currentUserID, String fullName, long start_num, long counts) {
-        if(fullName!=null && !fullName.isEmpty()){
-            String[] names = fullName.split(" ", 2);
-            if (names.length == 1) {
-                return friendDao.getFriends(currentUserID, names[0], start_num, counts);
-            } else if (names.length == 2) {
-                return friendDao.getFriends(currentUserID, names[0], names[1], start_num, counts);
-            } else {
-                return Optional.empty();
-            }
-        } else {
-            return friendDao.getFriends(currentUserID, start_num, counts);
-        }
+    public List<Optional<User>> getFriends(long currentUserID) {
+        return friendDao.getFriends(currentUserID);
     }
+
 
     @Override
     public Optional<Long> getCount(long currentUserID, String fullName) {
@@ -52,6 +41,22 @@ public class FriendServiceImpl implements FriendService{
             }
         } else {
             return friendDao.getCount(currentUserID);
+        }
+    }
+
+    @Override
+    public Optional<List<User>> getFriends(long currentUserID, String fullName, long start_num, long counts) {
+        if(fullName!=null && !fullName.isEmpty()){
+            String[] names = fullName.split(" ", 2);
+            if (names.length == 1) {
+                return friendDao.getFriends(currentUserID, names[0], start_num, counts);
+            } else if (names.length == 2) {
+                return friendDao.getFriends(currentUserID, names[0], names[1], start_num, counts);
+            } else {
+                return Optional.empty();
+            }
+        } else {
+            return friendDao.getFriends(currentUserID, start_num, counts);
         }
     }
 }
