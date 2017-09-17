@@ -80,7 +80,7 @@ public class RegistrationServlet extends HttpServlet {
                 log.debug("Create user[{}] is success", user.get().getId());
                 req.getSession(true).setAttribute("user", user.get());
                 resp.setStatus(HttpServletResponse.SC_OK);
-                resp.sendRedirect(req.getContextPath() + "/profile");
+                resp.sendRedirect(req.getContextPath() + "/profile_" + user.get().getId());
                 return;
             } else {
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

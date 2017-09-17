@@ -53,7 +53,7 @@ public class LoginServlet extends HttpServlet {
                 log.debug("User: {}", user);
                 req.getSession(true).setAttribute("user", user.get());
                 resp.setStatus(HttpServletResponse.SC_OK);
-                resp.sendRedirect(req.getContextPath() + "/profile");
+                resp.sendRedirect(req.getContextPath() + "/profile_" + user.get().getId());
                 return;
             } else {
                 /*

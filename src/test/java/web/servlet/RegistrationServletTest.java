@@ -68,7 +68,7 @@ public class RegistrationServletTest {
 
         verify(session).setAttribute("user", userOut.get());
         verify(resp).setStatus(HttpServletResponse.SC_OK);
-        verify(resp).sendRedirect("/contextPath/profile");
+        verify(resp).sendRedirect("/contextPath/profile_" + userOut.get().getId());
     }
 
     @Test

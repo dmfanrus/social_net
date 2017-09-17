@@ -12,7 +12,7 @@
 <fmt:setLocale value="${sessionScope.locale}"/>
 <fmt:setBundle basename="i18n.users" var="users"/>
 <fmt:message var="title" bundle="${users}" key="users.title"/>
-<jsp:useBean id="usersList" scope="request" type="java.util.List"/>
+<jsp:useBean id="usersList" scope="request" type="java.util.List<model.User>"/>
 <tags:user title="${title}">
     <h2><c:out value="${title}"/></h2>
     <div class="row">
@@ -37,7 +37,10 @@
                     <div class="row">
                         <div class="col-lg-2"></div>
                         <div class="col-lg-8">
-                                ${currentUser.lastName} ${currentUser.firstName}<br>
+                            <c:url var="userUrl" value="/profile_${currentUser.id}"/>
+                            <a href="${userUrl}" aria-label="user">
+                                <c:out value="${currentUser.lastName}"/> <c:out value="${currentUser.firstName}"/>
+                            </a>
                         </div>
                     </div>
                     <div class="row">
@@ -100,7 +103,6 @@
                             </li>
                         </c:if>
                     </ul>
-
                 </nav>
             </c:if>
             <div class="col-lg-2"></div>

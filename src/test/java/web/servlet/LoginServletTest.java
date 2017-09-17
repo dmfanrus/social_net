@@ -50,7 +50,7 @@ public class LoginServletTest {
 
         verify(session).setAttribute("user",user.get());
         verify(resp).setStatus(HttpServletResponse.SC_OK);
-        verify(resp).sendRedirect("/contextPath/profile");
+        verify(resp).sendRedirect("/contextPath/profile_" + user.get().getId());
     }
 
     @Test

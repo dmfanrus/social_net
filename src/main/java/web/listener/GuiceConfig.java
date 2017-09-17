@@ -53,14 +53,15 @@ public class GuiceConfig extends GuiceServletContextListener {
     private static class ServletConfigModule extends ServletModule {
         @Override
         protected void configureServlets() {
-            filter("/profile","/friends","/message","/profile_update","/logout","/users").through(LoggedInFilter.class);
+            filter("/friends","/message","/profile_update","/logout","/users").through(LoggedInFilter.class);
+            filterRegex("/profile_[0-9]+").through(LoggedInFilter.class);
             filter("/login","/registration").through(LoggedOutFilter.class);
             serve("/").with(RootServlet.class);
             serve("/help").with(HelpServlet.class);
             serve("/login").with(LoginServlet.class);
             serve("/registration").with(RegistrationServlet.class);
             serve("/logout").with(LogoutServlet.class);
-            serve("/profile").with(ProfileServlet.class);
+            serveRegex("/profile_[0-9]+").with(ProfileServlet.class);
             serve("/friends").with(FriendsServlet.class);
             serve("/message").with(MessageServlet.class);
             serve("/profile_update").with(Profile_UPD_Servlet.class);

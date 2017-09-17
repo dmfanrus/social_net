@@ -52,7 +52,7 @@
                                     <li><a href="${helpUrl}"><fmt:message bundle="${menu}" key="menu.help"/></a></li>
                                 </c:when>
                                 <c:otherwise>
-                                    <c:url var="profileUrl" value="/profile"/>
+                                    <c:url var="profileUrl" value="/profile_${sessionScope.user.id}"/>
                                     <li><a href="${profileUrl}"><fmt:message bundle="${menu}" key="menu.profile"/></a>
                                     </li>
                                     <c:url var="usersUrl" value="/users"/>
