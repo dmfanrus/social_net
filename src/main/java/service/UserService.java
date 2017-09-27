@@ -10,12 +10,14 @@ import java.util.Optional;
 
 public interface UserService {
     Optional<User> createUser(User user);
-    Optional<User> getByLogin(String login);
+    Optional<User> getUserById(long currentUserID, long otherUserID);
+    Optional<User> getCurrentUserById(long currentUserID);
+    Optional<User> getCurrentUserByLogin(String login);
     boolean checkExistByLogin(String login);
-    Optional<User> getByCredentials(Credentials credentials);
-    Optional<User> getById(long id);
-    Optional<List<User>> getUsers();
-    Optional<List<User>>  getUsers(String fullName, long start_num, long counts);
+    Optional<User> getCurrentUserByCredentials(Credentials credentials);
+    Optional<List<User>> getUsers(long currentUserID);
+    Optional<List<User>>  getUsers(long currentUserID, long start_num, long counts);
+    Optional<List<User>>  getUsers(long currentUserID, String fullName, long start_num, long counts);
     Optional<Long> getCount();
     Optional<Long> getCount(String fullName);
 }

@@ -35,7 +35,7 @@ public class ProfileServlet extends HelpServlet {
         if (servletPath.matches(SERVLET_PATTERN)) {
             String idS = servletPath.substring(servletPath.lastIndexOf("_") + 1);
             long id = Long.parseLong(servletPath.substring(servletPath.lastIndexOf("_") + 1));
-                Optional<User> user = userService.getById(id);
+                Optional<User> user = userService.getUserById(currentUserID, id);
                 if (user.isPresent()) {
                     req.setAttribute("userInfo", user.get());
                     if(currentUserID == id)

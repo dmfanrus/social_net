@@ -3,6 +3,7 @@ package model;
 import lombok.Builder;
 import lombok.Value;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 
 @Value
@@ -16,6 +17,8 @@ public class User{
     String password;
     LocalDate dateOfBirth;
     Gender gender;
+    RelationStatus relationStatus;
+    Timestamp timeCreate;
 
     public long getId() {
         return id;
@@ -49,6 +52,14 @@ public class User{
         return lastName;
     }
 
+    public RelationStatus getRelationship() {
+        return relationStatus;
+    }
+
+    public Timestamp getTimeCreate() {
+        return timeCreate;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -60,6 +71,8 @@ public class User{
                 ", password='" + password + '\'' +
                 ", dateOfBirth=" + dateOfBirth +
                 ", gender=" + gender +
+                ", relationStatus=" + relationStatus +
+                ", ts_create=" + timeCreate +
                 '}';
     }
 }

@@ -3,7 +3,7 @@ package web.servlet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import model.User;
-import service.FriendService;
+import service.RelationshipService;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -14,14 +14,14 @@ import java.util.List;
 import java.util.Optional;
 
 @Singleton
-public class FriendsServlet extends HttpServlet{
+public class FriendsServlet extends HttpServlet {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FriendsServlet.class);
     private static final int USERSONPAGE = 10;
-    private final FriendService friendsService;
+    private final RelationshipService relationshipService;
 
     @Inject
-    public FriendsServlet(FriendService friendsService) {
-        this.friendsService = friendsService;
+    public FriendsServlet(RelationshipService relationshipService) {
+        this.relationshipService = relationshipService;
     }
 
     @Override
@@ -33,16 +33,18 @@ public class FriendsServlet extends HttpServlet{
         String fullName = req.getParameter("fullName");
         String currPageS = req.getParameter("page");
         long currentPage = currPageS == null ? 1 : Long.parseLong(currPageS);
-        Optional<Long> countUsers = friendsService.getCount(currentUserID,fullName);
+        Optional<Long> countUsers = relationshipService.getCount(currentUserID, fullName);
 
         if (countUsers.isPresent()) {
             long countPages = (long) Math.ceil((float) countUsers.get() / USERSONPAGE);
-            if (countPages < currentPage || currentPage < 1) {
-                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                req.getRequestDispatcher("/WEB-INF/not_found.jsp").forward(req, resp);
-                return;
+            if ((countPages < currentPage) || currentPage < 1) {
+                if (countPages!=0 && currentPage!=1) {
+                    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    req.getRequestDispatcher("/WEB-INF/not_found.jsp").forward(req, resp);
+                    return;
+                }
             }
-            users = friendsService.getFriends(currentUserID, fullName, (currentPage - 1) * USERSONPAGE, USERSONPAGE);
+            users = relationshipService.getFriends(currentUserID, fullName, (currentPage - 1) * USERSONPAGE, USERSONPAGE);
             if (users.isPresent()) {
 
                 long startPage = currentPage - 2 > 0 ? currentPage - 2 : 1;
@@ -79,11 +81,11 @@ public class FriendsServlet extends HttpServlet{
         long currentPage = 1;
         Optional<List<User>> users;
         String fullName = req.getParameter("fullName");
-        Optional<Long> countUsers = friendsService.getCount(currentUserID,fullName);
+        Optional<Long> countUsers = relationshipService.getCount(currentUserID, fullName);
 
         if (countUsers.isPresent()) {
             countPages = (long) Math.ceil((float) countUsers.get() / USERSONPAGE);
-            users = friendsService.getFriends(currentUserID, fullName, (currentPage - 1) * USERSONPAGE, USERSONPAGE);
+            users = relationshipService.getFriends(currentUserID, fullName, (currentPage - 1) * USERSONPAGE, USERSONPAGE);
             if (users.isPresent()) {
                 long startPage = currentPage - 2 > 0 ? currentPage - 2 : 1;
                 long endPage = startPage + 4 <= countPages ? startPage + 4 : countPages;

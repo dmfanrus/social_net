@@ -1,5 +1,6 @@
 package dao;
 
+import model.Credentials;
 import model.User;
 
 import java.util.List;
@@ -10,14 +11,25 @@ import java.util.Optional;
  */
 
 public interface UserDao {
-    Optional<User> getByLogin(String loginName);
-    Optional<User> getById(long id);
     Optional<User> createUser(User user);
-    Optional<List<User>> getUsers();
-    Optional<List<User>> getUsers(long start_num,long counts);
-    Optional<List<User>> getUsers(String name, long start_num, long counts);
-    Optional<List<User>> getUsers(String firstName, String lastName, long start_num, long counts);
-    Optional<Long> getCount();
-    Optional<Long> getCount(String name);
-    Optional<Long> getCount(String firstName, String lastName);
+    void deleteUserById(long id);
+    void updateUserInfo(User user);
+    void updateUserLogin(Credentials credentials);
+    void updateUserPassword(Credentials credentials);
+    Optional<User> getCurrentUserWithAllInfoById(long id);
+    Optional<User> getCurrentUserWithAllInfoByLogin(String login);
+    Optional<User> getCurrentUserWithoutCredentialsByID(long id);
+    Optional<User> getOtherUserWithAllInfoById(long currentUserID, long otherUserID);
+    Optional<User> getOtherUserWithoutCredentialsByID(long currentUserID, long otherUserID);
+    Optional<Credentials> getCredentialsById(long id);
+    Optional<Credentials> getCredentialsByLogin(String login);
+
+    Optional<List<User>> getAllUsers(long currentUserID);
+    Optional<Long> getCountAllUsers();
+    Optional<List<User>> getSeveralUsers(long currentUserID, long start_num, long counts);
+    Optional<List<User>> getSeveralUsers(long currentUserID, String fullName, long start_num, long counts);
+    Optional<Long> getCountSeveralUsers(String fullName);
+    Optional<List<User>> getSeveralUsers(long currentUserID, String firstName, String lastName, long start_num, long counts);
+    Optional<Long> getCountSeveralUsers(String firstName, String lastName);
+
 }

@@ -2,12 +2,12 @@ package dao.impl;
 
 import dao.UserDao;
 //import model.Gender;
-import model.Gender;
-import model.User;
+import model.*;
 import com.google.inject.Inject;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -26,69 +26,6 @@ public class UserDaoImpl implements UserDao {
         this.dataSource = dataSource;
     }
 
-    @Override
-    public Optional<User> getByLogin(String login) {
-        try (Connection connection = dataSource.getConnection()) {
-            final PreparedStatement select = connection.prepareStatement(
-                    "SELECT user_id, user_firstname, user_lastname, user_login, user_hashpass, user_email, user_dateofbirth, user_gender " +
-                            "FROM users " +
-                            "WHERE users.user_login=?");
-            select.setString(1, login);
-            select.executeQuery();
-            final ResultSet resultSet = select.getResultSet();
-            if (resultSet.next()) {
-                return Optional.of(
-                        User.builder()
-                                .id(resultSet.getInt(1))
-                                .firstName(resultSet.getString(2))
-                                .lastName(resultSet.getString(3))
-                                .login(resultSet.getString(4))
-                                .password(resultSet.getString(5))
-                                .email(resultSet.getString(6))
-                                .dateOfBirth(resultSet.getDate(7).toLocalDate())
-                                .gender(Gender.valueOf(resultSet.getString(8)))
-                                .build());
-            } else {
-                return Optional.empty();
-            }
-        } catch (SQLException e) {
-            log.error("Failed to get user by Login", e);
-            e.printStackTrace();
-        }
-        log.error("Failed to get DS Connection");
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<User> getById(long id) {
-        try (Connection connection = dataSource.getConnection()) {
-            final PreparedStatement select = connection.prepareStatement(
-                    "SELECT user_firstname, user_lastname, user_login, user_email, user_dateofbirth, user_gender " +
-                            "FROM users " +
-                            "WHERE users.user_id=?");
-            select.setLong(1, id);
-            select.executeQuery();
-            final ResultSet resultSet = select.getResultSet();
-            if (resultSet.next()) {
-                return Optional.of(
-                        User.builder()
-                                .id(id)
-                                .firstName(resultSet.getString(1))
-                                .lastName(resultSet.getString(2))
-                                .login(resultSet.getString(3))
-                                .email(resultSet.getString(4))
-                                .dateOfBirth(resultSet.getDate(5).toLocalDate())
-                                .gender(Gender.valueOf(resultSet.getString(6)))
-                                .build());
-            } else {
-                return Optional.empty();
-            }
-        } catch (SQLException e) {
-            log.error("Failed to get user by ID", e);
-        }
-        log.error("Failed to get DS Connection");
-        return Optional.empty();
-    }
 
     @Override
     public Optional<User> createUser(User user) {
@@ -96,8 +33,8 @@ public class UserDaoImpl implements UserDao {
             final String[] returning = {"user_id"};
             final PreparedStatement insert = connection.prepareStatement(
                     "INSERT INTO users " +
-                            "(user_firstname, user_lastname, user_login, user_hashpass, user_email, user_dateofbirth, user_gender) " +
-                            "VALUES(?, ?, ?, ?, ?, ?, ?)", returning);
+                            "(firstname, lastname, login, hashpass, email, dateofbirth, gender, ts_create) " +
+                            "VALUES(?, ?, ?, ?, ?, ?, ?, ?)", returning);
             insert.setString(1, user.getFirstName());
             insert.setString(2, user.getLastName());
             insert.setString(3, user.getLogin());
@@ -105,224 +42,500 @@ public class UserDaoImpl implements UserDao {
             insert.setString(5, user.getEmail());
             insert.setDate(6, Date.valueOf(user.getDateOfBirth()));
             insert.setString(7, user.getGender().name());
+            insert.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now()));
             insert.executeUpdate();
             final ResultSet generatedKeys = insert.getGeneratedKeys();
             if (generatedKeys.next()) {
-                return getById(generatedKeys.getLong(1));
+                return getCurrentUserWithAllInfoById(generatedKeys.getLong(1));
             } else {
                 log.warn("Create user returned null with request({},{})", insert, insert.getWarnings());
                 return Optional.empty();
             }
         } catch (SQLException e) {
             log.error("Failed to create user", e);
+            return Optional.empty();
         }
-        log.error("Failed to get DS Connection");
-        return Optional.empty();
+    }
+
+
+    @Override
+    public void deleteUserById(long id) {
+        try (Connection connection = dataSource.getConnection()) {
+            final PreparedStatement delete = connection.prepareStatement(
+                    "DELETE FROM users WHERE id = ?");
+            delete.setLong(1, id);
+            delete.executeUpdate();
+        } catch (SQLException e) {
+            log.error("Failed to get count of users with fullname", e);
+        }
     }
 
     @Override
-    public Optional<List<User>> getUsers() {
+    public void updateUserInfo(User user) {
+        try (Connection connection = dataSource.getConnection()) {
+            final PreparedStatement delete = connection.prepareStatement(
+                    "UPDATE users " +
+                            "SET firstname=?, lastname=?, email=?, " +
+                            "dateofbirth=?, gender=? " +
+                            "WHERE id=?");
+            delete.setString(1, user.getFirstName());
+            delete.setString(2, user.getLastName());
+            delete.setString(3, user.getEmail());
+            delete.setDate(4, Date.valueOf(user.getDateOfBirth()));
+            delete.setString(5, user.getGender().name());
+            delete.setLong(6, user.getId());
+            delete.executeUpdate();
+        } catch (SQLException e) {
+            log.error("Failed to get count of users with fullname", e);
+        }
+    }
+
+    @Override
+    public void updateUserLogin(Credentials credentials) {
+        try (Connection connection = dataSource.getConnection()) {
+            final PreparedStatement delete = connection.prepareStatement(
+                    "UPDATE users SET login=? WHERE id=?");
+            delete.setString(1, credentials.getLogin());
+            delete.setLong(2, credentials.getId());
+            delete.executeUpdate();
+        } catch (SQLException e) {
+            log.error("Failed to get count of users with fullname", e);
+        }
+    }
+
+    @Override
+    public void updateUserPassword(Credentials credentials) {
+        try (Connection connection = dataSource.getConnection()) {
+            final PreparedStatement delete = connection.prepareStatement(
+                    "UPDATE users SET hashpass=? WHERE id=?");
+            delete.setString(1, credentials.getPassword());
+            delete.setLong(2, credentials.getId());
+            delete.executeUpdate();
+        } catch (SQLException e) {
+            log.error("Failed to get count of users with fullname", e);
+        }
+    }
+
+    @Override
+    public Optional<User> getCurrentUserWithAllInfoById(long id) {
         try (Connection connection = dataSource.getConnection()) {
             final PreparedStatement select = connection.prepareStatement(
-                    "SELECT user_id, user_firstname, user_lastname, user_login, user_email, user_dateofbirth, user_gender " +
-                            "FROM users");
+                    "SELECT * FROM users WHERE id=?");
+            select.setLong(1, id);
             select.executeQuery();
             final ResultSet resultSet = select.getResultSet();
-            final List<User> users = new ArrayList<>();
-            while (resultSet.next()) {
-                users.add(
+            if (resultSet.next()) {
+                return Optional.of(
                         User.builder()
                                 .id(resultSet.getLong(1))
                                 .firstName(resultSet.getString(2))
                                 .lastName(resultSet.getString(3))
                                 .login(resultSet.getString(4))
-                                .email(resultSet.getString(5))
-                                .dateOfBirth(resultSet.getDate(6).toLocalDate())
-                                .gender(Gender.valueOf(resultSet.getString(7)))
+                                .password(resultSet.getString(5))
+                                .email(resultSet.getString(6))
+                                .dateOfBirth(resultSet.getDate(7).toLocalDate())
+                                .gender(Gender.valueOf(resultSet.getString(8)))
+                                .timeCreate(resultSet.getTimestamp(9))
+                                .build());
+            }
+        } catch (SQLException e) {
+            log.error("Failed to get count of users with fullname", e);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<User> getCurrentUserWithAllInfoByLogin(String login) {
+        try (Connection connection = dataSource.getConnection()) {
+            final PreparedStatement select = connection.prepareStatement(
+                    "SELECT * FROM users WHERE login=?");
+            select.setString(1, login);
+            select.executeQuery();
+            final ResultSet resultSet = select.getResultSet();
+            if (resultSet.next()) {
+                return Optional.of(
+                        User.builder()
+                                .id(resultSet.getLong(1))
+                                .firstName(resultSet.getString(2))
+                                .lastName(resultSet.getString(3))
+                                .login(resultSet.getString(4))
+                                .password(resultSet.getString(5))
+                                .email(resultSet.getString(6))
+                                .dateOfBirth(resultSet.getDate(7).toLocalDate())
+                                .gender(Gender.valueOf(resultSet.getString(8)))
+                                .timeCreate(resultSet.getTimestamp(9))
+                                .build());
+            }
+        } catch (SQLException e) {
+            log.error("Failed to get count of users with fullname", e);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<User> getCurrentUserWithoutCredentialsByID(long id) {
+        try (Connection connection = dataSource.getConnection()) {
+            final PreparedStatement select = connection.prepareStatement(
+                    "SELECT u.id, u.firstname, u.lastname, u.email, " +
+                            "u.dateofbirth, u.gender, u.ts_create " +
+                            "FROM users u WHERE u.id=?");
+            select.setLong(1, id);
+            select.executeQuery();
+            final ResultSet resultSet = select.getResultSet();
+            if (resultSet.next()) {
+                return Optional.of(
+                        User.builder()
+                                .id(resultSet.getLong(1))
+                                .firstName(resultSet.getString(2))
+                                .lastName(resultSet.getString(3))
+                                .email(resultSet.getString(4))
+                                .dateOfBirth(resultSet.getDate(5).toLocalDate())
+                                .gender(Gender.valueOf(resultSet.getString(6)))
+                                .timeCreate(resultSet.getTimestamp(7))
+                                .build());
+            }
+        } catch (SQLException e) {
+            log.error("Failed to get count of users with fullname", e);
+        }
+        return Optional.empty();
+    }
+
+
+    @Override
+    public Optional<User> getOtherUserWithAllInfoById(long currentUserID, long otherUserID) {
+        try (Connection connection = dataSource.getConnection()) {
+            final PreparedStatement select = connection.prepareStatement(
+                    "SELECT u.id, u.firstname, u.lastname, u.login, u.hashpass, u.email, " +
+                            "u.dateofbirth, u.gender, u.ts_create, r.rel_status, r.ts_action " +
+                            "FROM users u " +
+                            "LEFT JOIN relationships r " +
+                            "ON u.id=r.second_user_id AND r.first_user_id=? " +
+                            "WHERE u.id=?");
+            select.setLong(1, currentUserID);
+            select.setLong(2, otherUserID);
+            select.executeQuery();
+            final ResultSet resultSet = select.getResultSet();
+            if (resultSet.next()) {
+                long getId = resultSet.getLong(1);
+                return Optional.of(
+                        User.builder()
+                                .id(getId)
+                                .firstName(resultSet.getString(2))
+                                .lastName(resultSet.getString(3))
+                                .login(resultSet.getString(4))
+                                .password(resultSet.getString(5))
+                                .email(resultSet.getString(6))
+                                .dateOfBirth(resultSet.getDate(7).toLocalDate())
+                                .gender(Gender.valueOf(resultSet.getString(8)))
+                                .timeCreate(resultSet.getTimestamp(9))
+                                .relationStatus(getRelStatusByString(resultSet.getString(10), currentUserID, getId))
+                                .build());
+            }
+        } catch (SQLException e) {
+            log.error("Failed to get count of users with fullname", e);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<User> getOtherUserWithoutCredentialsByID(long currentUserID, long otherUserID) {
+        try (Connection connection = dataSource.getConnection()) {
+            final PreparedStatement select = connection.prepareStatement(
+                    "SELECT u.id, u.firstname, u.lastname, u.email, " +
+                            "u.dateofbirth, u.gender, u.ts_create, r.rel_status, r.ts_action " +
+                            "FROM users u " +
+                            "LEFT JOIN relationships r " +
+                            "ON u.id=r.second_user_id AND r.first_user_id=? " +
+                            "WHERE u.id=?");
+            select.setLong(1, currentUserID);
+            select.setLong(2, otherUserID);
+            select.executeQuery();
+            final ResultSet resultSet = select.getResultSet();
+            if (resultSet.next()) {
+                long getId = resultSet.getLong(1);
+                return Optional.of(
+                        User.builder()
+                                .id(getId)
+                                .firstName(resultSet.getString(2))
+                                .lastName(resultSet.getString(3))
+                                .email(resultSet.getString(4))
+                                .dateOfBirth(resultSet.getDate(5).toLocalDate())
+                                .gender(Gender.valueOf(resultSet.getString(6)))
+                                .timeCreate(resultSet.getTimestamp(7))
+                                .relationStatus(getRelStatusByString(resultSet.getString(8), currentUserID, getId))
+                                .build());
+            }
+        } catch (SQLException e) {
+            log.error("Failed to get count of users with fullname", e);
+        }
+        return Optional.empty();
+    }
+
+
+    @Override
+    public Optional<Credentials> getCredentialsById(long id) {
+        try (Connection connection = dataSource.getConnection()) {
+            final PreparedStatement select = connection.prepareStatement(
+                    "SELECT id, login, hashpass FROM users WHERE id=?");
+            select.setLong(1, id);
+            select.executeQuery();
+            final ResultSet resultSet = select.getResultSet();
+            if (resultSet.next()) {
+                return Optional.of(
+                        Credentials.builder()
+                                .id(resultSet.getLong(1))
+                                .login(resultSet.getString(2))
+                                .password(resultSet.getString(3))
+                                .build());
+            }
+        } catch (SQLException e) {
+            log.error("Failed to get count of users with fullname", e);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Credentials> getCredentialsByLogin(String login) {
+        try (Connection connection = dataSource.getConnection()) {
+            final PreparedStatement select = connection.prepareStatement(
+                    "SELECT id, login, hashpass FROM users WHERE login=?");
+            select.setString(1, login);
+            select.executeQuery();
+            final ResultSet resultSet = select.getResultSet();
+            if (resultSet.next()) {
+                return Optional.of(
+                        Credentials.builder()
+                                .id(resultSet.getLong(1))
+                                .login(resultSet.getString(2))
+                                .password(resultSet.getString(3))
+                                .build());
+            }
+        } catch (SQLException e) {
+            log.error("Failed to get count of users with fullname", e);
+        }
+        return Optional.empty();
+    }
+
+
+    @Override
+    public Optional<List<User>> getAllUsers(long currentUserID) {
+        try (Connection connection = dataSource.getConnection()) {
+            final PreparedStatement select = connection.prepareStatement(
+                    "SELECT u.id, u.firstname, u.lastname, u.email, " +
+                            "u.dateofbirth, u.gender, r.rel_status, r.ts_action " +
+                            "FROM users u " +
+                            "LEFT JOIN relationships r " +
+                            "ON u.id=r.second_user_id AND r.first_user_id=?");
+            select.setLong(1, currentUserID);
+            select.executeQuery();
+            final ResultSet resultSet = select.getResultSet();
+            final List<User> users = new ArrayList<>();
+            while (resultSet.next()) {
+                long getId = resultSet.getLong(1);
+                users.add(
+                        User.builder()
+                                .id(getId)
+                                .firstName(resultSet.getString(2))
+                                .lastName(resultSet.getString(3))
+                                .email(resultSet.getString(4))
+                                .dateOfBirth(resultSet.getDate(5).toLocalDate())
+                                .gender(Gender.valueOf(resultSet.getString(6)))
+                                .relationStatus(getRelStatusByString(resultSet.getString(7), currentUserID, getId))
                                 .build());
             }
             return Optional.of(users);
         } catch (SQLException e) {
             log.error("Failed to get all users", e);
         }
-        log.error("Failed to get DS Connection");
         return Optional.empty();
     }
 
     @Override
-    public Optional<List<User>> getUsers(long start_num, long counts) {
+    public Optional<Long> getCountAllUsers() {
         try (Connection connection = dataSource.getConnection()) {
             final PreparedStatement select = connection.prepareStatement(
-                    "SELECT user_id, user_firstname, user_lastname, user_login, user_email, user_dateofbirth, user_gender " +
-                            "FROM users LIMIT ? OFFSET ?");
-            select.setLong(1, counts);
-            select.setLong(2, start_num);
+                    "SELECT COUNT(*) FROM users u");
+            select.executeQuery();
+            final ResultSet resultSet = select.getResultSet();
+            if (resultSet.next()) {
+                return Optional.of(resultSet.getLong(1));
+            }
+        } catch (SQLException e) {
+            log.error("Failed to get all users", e);
+        }
+        return Optional.empty();
+    }
+
+
+    @Override
+    public Optional<List<User>> getSeveralUsers(long currentUserID, long start_num, long counts) {
+        try (Connection connection = dataSource.getConnection()) {
+            final PreparedStatement select = connection.prepareStatement(
+                    "SELECT u.id, u.firstname, u.lastname, u.email, " +
+                            "u.dateofbirth, u.gender, r.rel_status, r.ts_action " +
+                            "FROM users u " +
+                            "LEFT JOIN relationships r " +
+                            "ON u.id=r.second_user_id AND r.first_user_id=? " +
+                            "LIMIT ? OFFSET ?");
+            select.setLong(1, currentUserID);
+            select.setLong(2, counts);
+            select.setLong(3, start_num);
             select.executeQuery();
             final ResultSet resultSet = select.getResultSet();
             final List<User> users = new ArrayList<>();
             while (resultSet.next()) {
+                long getId = resultSet.getLong(1);
                 users.add(
                         User.builder()
-                                .id(resultSet.getLong(1))
+                                .id(getId)
                                 .firstName(resultSet.getString(2))
                                 .lastName(resultSet.getString(3))
-                                .login(resultSet.getString(4))
-                                .email(resultSet.getString(5))
-                                .dateOfBirth(resultSet.getDate(6).toLocalDate())
-                                .gender(Gender.valueOf(resultSet.getString(7)))
+                                .email(resultSet.getString(4))
+                                .dateOfBirth(resultSet.getDate(5).toLocalDate())
+                                .gender(Gender.valueOf(resultSet.getString(6)))
+                                .relationStatus(getRelStatusByString(resultSet.getString(7), currentUserID, getId))
                                 .build());
             }
-            log.debug("Return array of users[{}]", users.size());
             return Optional.of(users);
         } catch (SQLException e) {
-            log.error("Failed to get users by count", e);
+            log.error("Failed to get all users", e);
         }
-        log.error("Failed to get DS Connection");
         return Optional.empty();
     }
 
     @Override
-    public Optional<List<User>> getUsers(String name, long start_num, long counts) {
+    public Optional<List<User>> getSeveralUsers(long currentUserID, String fullName, long start_num, long counts) {
         try (Connection connection = dataSource.getConnection()) {
             final PreparedStatement select = connection.prepareStatement(
-                    "SELECT user_id, user_firstname, user_lastname, user_login, user_email, user_dateofbirth, user_gender " +
-                            "FROM users WHERE user_firstname LIKE ? OR user_lastname LIKE ? LIMIT ? OFFSET ?");
-            select.setString(1, name + '%');
-            select.setString(2, name + '%');
-            select.setLong(3, counts);
-            select.setLong(4, start_num);
+                    "SELECT u.id, u.firstname, u.lastname, u.email, " +
+                            "u.dateofbirth, u.gender, r.rel_status, r.ts_action " +
+                            "FROM users u " +
+                            "LEFT JOIN relationships r " +
+                            "ON u.id=r.second_user_id AND r.first_user_id=? " +
+                            "WHERE (u.firstname LIKE ? OR u.lastname LIKE ?) " +
+                            "LIMIT ? OFFSET ?");
+            select.setLong(1, currentUserID);
+            select.setString(2, fullName + "%");
+            select.setString(3, fullName + "%");
+            select.setLong(4, counts);
+            select.setLong(5, start_num);
             select.executeQuery();
             final ResultSet resultSet = select.getResultSet();
             final List<User> users = new ArrayList<>();
             while (resultSet.next()) {
+                long getId = resultSet.getLong(1);
                 users.add(
                         User.builder()
-                                .id(resultSet.getLong(1))
+                                .id(getId)
                                 .firstName(resultSet.getString(2))
                                 .lastName(resultSet.getString(3))
-                                .login(resultSet.getString(4))
-                                .email(resultSet.getString(5))
-                                .dateOfBirth(resultSet.getDate(6).toLocalDate())
-                                .gender(Gender.valueOf(resultSet.getString(7)))
+                                .email(resultSet.getString(4))
+                                .dateOfBirth(resultSet.getDate(5).toLocalDate())
+                                .gender(Gender.valueOf(resultSet.getString(6)))
+                                .relationStatus(getRelStatusByString(resultSet.getString(7), currentUserID, getId))
                                 .build());
             }
-            log.debug("Return array of users[{}]", users.size());
             return Optional.of(users);
         } catch (SQLException e) {
-            log.error("Failed to get users by string", e);
+            log.error("Failed to get all users", e);
         }
-        log.error("Failed to get DS Connection");
         return Optional.empty();
     }
 
-
     @Override
-    public Optional<List<User>> getUsers(String firstName, String lastName, long start_num, long counts) {
+    public Optional<Long> getCountSeveralUsers(String fullName) {
         try (Connection connection = dataSource.getConnection()) {
             final PreparedStatement select = connection.prepareStatement(
-                    "SELECT user_id, user_firstname, user_lastname, user_login, user_email, user_dateofbirth, user_gender " +
-                            "FROM users WHERE " +
-                            "(user_firstname LIKE ? AND user_lastname LIKE ?) OR " +
-                            "(user_lastname LIKE ? AND user_firstname LIKE ?) LIMIT ? OFFSET ?");
-            select.setString(1, firstName + '%');
+                    "SELECT COUNT(*) FROM users u " +
+                            "WHERE (u.firstname LIKE ? OR u.lastname LIKE ?) ");
+            select.setString(1, fullName + "%");
+            select.setString(2, fullName + "%");
+            select.executeQuery();
+            final ResultSet resultSet = select.getResultSet();
+            if (resultSet.next()) {
+                return Optional.of(resultSet.getLong(1));
+            }
+        } catch (SQLException e) {
+            log.error("Failed to get all users", e);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<List<User>> getSeveralUsers(long currentUserID, String firstName, String lastName, long start_num, long counts) {
+        try (Connection connection = dataSource.getConnection()) {
+            final PreparedStatement select = connection.prepareStatement(
+                    "SELECT u.id, u.firstname, u.lastname, u.email, " +
+                            "u.dateofbirth, u.gender, r.rel_status, r.ts_action " +
+                            "FROM users u " +
+                            "LEFT JOIN relationships r " +
+                            "ON u.id=r.second_user_id AND r.first_user_id=? " +
+                            "WHERE (u.firstname LIKE ? AND u.lastname LIKE ?) OR " +
+                            "(u.lastname LIKE ? AND u.firstname LIKE ?) " +
+                            "LIMIT ? OFFSET ?");
+            select.setLong(1, currentUserID);
+            select.setString(2, firstName + "%");
+            select.setString(3, lastName);
+            select.setString(4, lastName);
+            select.setString(5, firstName + "%");
+            select.setLong(6, counts);
+            select.setLong(7, start_num);
+            select.executeQuery();
+            final ResultSet resultSet = select.getResultSet();
+            final List<User> users = new ArrayList<>();
+            while (resultSet.next()) {
+                long getId = resultSet.getLong(1);
+                users.add(
+                        User.builder()
+                                .id(getId)
+                                .firstName(resultSet.getString(2))
+                                .lastName(resultSet.getString(3))
+                                .email(resultSet.getString(4))
+                                .dateOfBirth(resultSet.getDate(5).toLocalDate())
+                                .gender(Gender.valueOf(resultSet.getString(6)))
+                                .relationStatus(getRelStatusByString(resultSet.getString(7), currentUserID, getId))
+                                .build());
+            }
+            return Optional.of(users);
+        } catch (SQLException e) {
+            log.error("Failed to get all users", e);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Long> getCountSeveralUsers(String firstName, String lastName) {
+        try (Connection connection = dataSource.getConnection()) {
+            final PreparedStatement select = connection.prepareStatement(
+                    "SELECT COUNT(*) FROM users u " +
+                            "WHERE (u.firstname LIKE ? AND u.lastname LIKE ?) OR " +
+                            "(u.lastname LIKE ? AND u.firstname LIKE ?) ");
+            select.setString(1, firstName + "%");
             select.setString(2, lastName);
-            select.setString(3, firstName);
-            select.setString(4, lastName + '%');
-            select.setLong(5, counts);
-            select.setLong(6, start_num);
-            select.executeQuery();
-            final ResultSet resultSet = select.getResultSet();
-            final List<User> users = new ArrayList<>();
-            while (resultSet.next()) {
-                users.add(
-                        User.builder()
-                                .id(resultSet.getLong(1))
-                                .firstName(resultSet.getString(2))
-                                .lastName(resultSet.getString(3))
-                                .login(resultSet.getString(4))
-                                .email(resultSet.getString(5))
-                                .dateOfBirth(resultSet.getDate(6).toLocalDate())
-                                .gender(Gender.valueOf(resultSet.getString(7)))
-                                .build());
-            }
-            log.debug("Return array of users[{}]", users.size());
-            return Optional.of(users);
-        } catch (SQLException e) {
-            log.error("Failed to get users by string", e);
-        }
-        log.error("Failed to get DS Connection");
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Long> getCount() {
-        try (Connection connection = dataSource.getConnection()) {
-            final PreparedStatement select = connection.prepareStatement(
-                    "SELECT COUNT(*) " +
-                            "FROM users");
+            select.setString(3, lastName);
+            select.setString(4, firstName + "%");
             select.executeQuery();
             final ResultSet resultSet = select.getResultSet();
             if (resultSet.next()) {
                 return Optional.of(resultSet.getLong(1));
-            } else {
-                return Optional.empty();
             }
         } catch (SQLException e) {
-            log.error("Failed to get count of all users", e);
+            log.error("Failed to get all users", e);
         }
-        log.error("Failed to get DS Connection");
         return Optional.empty();
     }
 
-    @Override
-    public Optional<Long> getCount(String name) {
-        try (Connection connection = dataSource.getConnection()) {
-            final PreparedStatement select = connection.prepareStatement(
-                    "SELECT COUNT(*) " +
-                            "FROM users WHERE " +
-                            "user_firstname LIKE ? OR user_lastname LIKE ?");
 
-            select.setString(1, name + '%');
-            select.setString(2, name + '%');
-            select.executeQuery();
-            final ResultSet resultSet = select.getResultSet();
-            if (resultSet.next()) {
-                return Optional.of(resultSet.getLong(1));
+    private RelationStatus getRelStatusByString(String relationStatus, long currentUserID, long getUserID) {
+        if (relationStatus == null) {
+            if (currentUserID == getUserID) {
+                return RelationStatus.ME;
             } else {
-                return Optional.empty();
+                return RelationStatus.UNKNOW;
             }
-        } catch (SQLException e) {
-            log.error("Failed to get count of users with fullname", e);
+        } else {
+            return RelationStatus.valueOf(relationStatus);
         }
-        log.error("Failed to get DS Connection");
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Long> getCount(String firstName, String lastName) {
-        try (Connection connection = dataSource.getConnection()) {
-            final PreparedStatement select = connection.prepareStatement(
-                    "SELECT COUNT(*) " +
-                            "FROM users WHERE " +
-                            "(user_firstname LIKE ? AND user_lastname LIKE ?) OR " +
-                            "(user_lastname LIKE ? AND user_firstname LIKE ?)");
-
-            select.setString(1, firstName + '%');
-            select.setString(2, lastName);
-            select.setString(3, firstName);
-            select.setString(4, lastName + '%');
-            select.executeQuery();
-            final ResultSet resultSet = select.getResultSet();
-            if (resultSet.next()) {
-                return Optional.of(resultSet.getLong(1));
-            } else {
-                return Optional.empty();
-            }
-        } catch (SQLException e) {
-            log.error("Failed to get count of users with fullname", e);
-        }
-        log.error("Failed to get DS Connection");
-        return Optional.empty();
     }
 
 

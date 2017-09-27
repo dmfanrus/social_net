@@ -49,7 +49,7 @@ public class ProfileServletTest {
         when(req.getSession(false)).thenReturn(session);
         when(session.getAttribute("user")).thenReturn(currentUser);
         when(req.getServletPath()).thenReturn("/profile_1");
-        when(userService.getById(1)).thenReturn(Optional.of(currentUser));
+        when(userService.getUserById(1,1)).thenReturn(Optional.of(currentUser));
         when(req.getRequestDispatcher("/WEB-INF/profile.jsp")).thenReturn(dispatcher);
 
         profileServlet.doGet(req,resp);
@@ -83,7 +83,7 @@ public class ProfileServletTest {
         when(req.getSession(false)).thenReturn(session);
         when(session.getAttribute("user")).thenReturn(currentUser);
         when(req.getServletPath()).thenReturn("/profile_10");
-        when(userService.getById(10)).thenReturn(Optional.of(user));
+        when(userService.getUserById(1,10)).thenReturn(Optional.of(user));
         when(req.getRequestDispatcher("/WEB-INF/profile.jsp")).thenReturn(dispatcher);
 
         profileServlet.doGet(req,resp);
@@ -105,7 +105,7 @@ public class ProfileServletTest {
         when(req.getSession(false)).thenReturn(session);
         when(session.getAttribute("user")).thenReturn(currentUser);
         when(req.getServletPath()).thenReturn("/profile_41");
-        when(userService.getById(41)).thenReturn(Optional.empty());
+        when(userService.getUserById(1,41)).thenReturn(Optional.empty());
         when(req.getRequestDispatcher("/WEB-INF/not_found.jsp")).thenReturn(dispatcher);
 
         profileServlet.doGet(req,resp);

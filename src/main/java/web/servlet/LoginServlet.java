@@ -12,8 +12,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 @Singleton
@@ -48,7 +46,7 @@ public class LoginServlet extends HttpServlet {
         FormValidation validate = formValidation(credentials);
 
         if (validate.isValid()) {
-            Optional<User> user = userService.getByCredentials(credentials);
+            Optional<User> user = userService.getCurrentUserByCredentials(credentials);
             if (user.isPresent()) {
                 log.debug("User: {}", user);
                 req.getSession(true).setAttribute("user", user.get());

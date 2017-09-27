@@ -22,7 +22,9 @@ public class UserServiceTest {
     public void testCreateUser(){
         UserDao userDao = mock(UserDao.class);
         SecurityService securityService = new SecurityServiceImpl();
-        UserService userService = new UserServiceImpl(userDao,securityService);
+        RelationshipService relationshipService = mock(RelationshipService.class);
+        NotificationService notificationService = mock(NotificationService.class);
+        UserService userService = new UserServiceImpl(userDao,securityService, relationshipService, notificationService);
 
         User userIn = User.builder()
                 .firstName("testFirstName")
@@ -51,7 +53,9 @@ public class UserServiceTest {
     public void testGetByCredentials(){
         UserDao userDao = mock(UserDao.class);
         SecurityService securityService = new SecurityServiceImpl();
-        UserService userService = new UserServiceImpl(userDao,securityService);
+        RelationshipService relationshipService = mock(RelationshipService.class);
+        NotificationService notificationService = mock(NotificationService.class);
+        UserService userService = new UserServiceImpl(userDao,securityService, relationshipService, notificationService);
 
         Credentials credentials = Credentials.builder()
                 .login("testLogin")
@@ -67,9 +71,9 @@ public class UserServiceTest {
                 .dateOfBirth(LocalDate.of(1998,11,19))
                 .gender(Gender.MALE)
                 .build());
-        when(userDao.getByLogin(credentials.getLogin())).thenReturn(userOut);
+        when(userDao.getCurrentUserWithAllInfoByLogin(credentials.getLogin())).thenReturn(userOut);
 
-        assertEquals(userOut,userService.getByCredentials(credentials));
+        assertEquals(userOut,userService.getCurrentUserByCredentials(credentials));
     }
 
 
@@ -77,7 +81,9 @@ public class UserServiceTest {
     public void testCredentialsWithWrongPassword(){
         UserDao userDao = mock(UserDao.class);
         SecurityService securityService = new SecurityServiceImpl();
-        UserService userService = new UserServiceImpl(userDao,securityService);
+        RelationshipService relationshipService = mock(RelationshipService.class);
+        NotificationService notificationService = mock(NotificationService.class);
+        UserService userService = new UserServiceImpl(userDao,securityService, relationshipService, notificationService);
 
         Credentials credentials = Credentials.builder()
                 .login("testLogin")
@@ -93,24 +99,44 @@ public class UserServiceTest {
                 .dateOfBirth(LocalDate.of(1998,11,19))
                 .gender(Gender.MALE)
                 .build());
-        when(userDao.getByLogin(credentials.getLogin())).thenReturn(userOut);
+        when(userDao.getCurrentUserWithAllInfoByLogin(credentials.getLogin())).thenReturn(userOut);
 
-        assertEquals(Optional.empty(),userService.getByCredentials(credentials));
+        assertEquals(Optional.empty(),userService.getCurrentUserByCredentials(credentials));
     }
 
     @Test
     public void testCredentialsWithNonExistenLogin(){
         UserDao userDao = mock(UserDao.class);
         SecurityService securityService = new SecurityServiceImpl();
-        UserService userService = new UserServiceImpl(userDao,securityService);
+        RelationshipService relationshipService = mock(RelationshipService.class);
+        NotificationService notificationService = mock(NotificationService.class);
+        UserService userService = new UserServiceImpl(userDao,securityService, relationshipService, notificationService);
 
         Credentials credentials = Credentials.builder()
                 .login("testLogin")
                 .password("testWrongPassword")
                 .build();
-        when(userDao.getByLogin(credentials.getLogin())).thenReturn(Optional.empty());
+        when(userDao.getCurrentUserWithAllInfoByLogin(credentials.getLogin())).thenReturn(Optional.empty());
 
-        assertEquals(Optional.empty(),userService.getByCredentials(credentials));
+        assertEquals(Optional.empty(),userService.getCurrentUserByCredentials(credentials));
+    }
+
+
+    @Test
+    public void getUsersBy(){
+        UserDao userDao = mock(UserDao.class);
+        SecurityService securityService = new SecurityServiceImpl();
+        RelationshipService relationshipService = mock(RelationshipService.class);
+        NotificationService notificationService = mock(NotificationService.class);
+        UserService userService = new UserServiceImpl(userDao,securityService, relationshipService, notificationService);
+
+        Credentials credentials = Credentials.builder()
+                .login("testLogin")
+                .password("testWrongPassword")
+                .build();
+        when(userDao.getCurrentUserWithAllInfoByLogin(credentials.getLogin())).thenReturn(Optional.empty());
+
+        assertEquals(Optional.empty(),userService.getCurrentUserByCredentials(credentials));
     }
 
 }

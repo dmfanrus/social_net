@@ -9,11 +9,14 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
 <fmt:setLocale value="${sessionScope.locale}"/>
 <fmt:setBundle basename="i18n.login" var="login"/>
 <fmt:setBundle basename="i18n.errorsMessage" var="errorsMessage"/>
 <fmt:message var="title" bundle="${login}" key="login.title"/>
+
 <jsp:useBean id="data" type="model.Credentials" scope="request"/>
+
 <tags:user title="${title}">
     <div class="row">
         <div class="col-lg-2"></div>

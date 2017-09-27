@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,7 +29,8 @@ public class UsersServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
-        log.debug("GET - user[{}]", ((User) req.getSession(false).getAttribute("user")).getId());
+        long currentUserID = ((User) req.getSession(false).getAttribute("user")).getId();
+        log.debug("GET - user[{}]", currentUserID);
         Optional<List<User>> users;
         String fullName = req.getParameter("fullName");
         String currPageS = req.getParameter("page");
@@ -38,11 +40,13 @@ public class UsersServlet extends HttpServlet {
         if (countUsers.isPresent()) {
             long countPages = (long) Math.ceil((float) countUsers.get() / USERSONPAGE);
             if (countPages < currentPage || currentPage < 1) {
-                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                req.getRequestDispatcher("/WEB-INF/not_found.jsp").forward(req, resp);
-                return;
+                if (countPages!=0 && currentPage!=1) {
+                    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    req.getRequestDispatcher("/WEB-INF/not_found.jsp").forward(req, resp);
+                    return;
+                }
             }
-            users = userService.getUsers(fullName, (currentPage - 1) * USERSONPAGE, USERSONPAGE);
+            users = userService.getUsers(currentUserID, fullName, (currentPage - 1) * USERSONPAGE, USERSONPAGE);
             if (users.isPresent()) {
 
                 long startPage = currentPage - 2 > 0 ? currentPage - 2 : 1;
@@ -73,7 +77,8 @@ public class UsersServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
-        log.debug("POST - user[{}]", ((User) req.getSession(false).getAttribute("user")).getId());
+        long currentUserID = ((User) req.getSession(false).getAttribute("user")).getId();
+        log.debug("POST - user[{}]", currentUserID);
         long countPages;
         long currentPage = 1;
         Optional<List<User>> users;
@@ -82,7 +87,7 @@ public class UsersServlet extends HttpServlet {
 
         if (countUsers.isPresent()) {
             countPages = (long) Math.ceil((float) countUsers.get() / USERSONPAGE);
-            users = userService.getUsers(fullName, (currentPage - 1) * USERSONPAGE, USERSONPAGE);
+            users = userService.getUsers(currentUserID, fullName, (currentPage - 1) * USERSONPAGE, USERSONPAGE);
             if (users.isPresent()) {
                 long startPage = currentPage - 2 > 0 ? currentPage - 2 : 1;
                 long endPage = startPage + 4 <= countPages ? startPage + 4 : countPages;

@@ -1,6 +1,7 @@
 package web.servlet;
 
 import model.Gender;
+import model.RelationStatus;
 import model.User;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,25 +29,30 @@ public class UsersServletTest {
     private User user;
     private final List<User> users = new ArrayList<>();
     private final Long countPages = 6L;
+    private final long currentUserID = 1;
 
     @Before
     public void initValues() {
         user = User.builder()
+                .id(1)
                 .firstName("testFirstName")
                 .lastName("testLastName")
                 .login("testLogin")
                 .gender(Gender.MALE)
                 .email("test.test@test.test")
                 .dateOfBirth(LocalDate.of(1995, 11, 11))
+                .relationStatus(RelationStatus.ME)
                 .build();
         for (int i = 0; i < 6; i++)
             users.add(User.builder()
+                    .id(i)
                     .firstName("testFirstName")
                     .lastName("testLastName")
                     .login("testLogin")
                     .gender(Gender.MALE)
                     .email("test.test@test.test")
                     .dateOfBirth(LocalDate.of(1995, 11, 11))
+                    .relationStatus(RelationStatus.UNKNOW)
                     .build());
     }
 
@@ -64,7 +70,7 @@ public class UsersServletTest {
         when(req.getParameter("page")).thenReturn(null);
         when(req.getParameter("fullName")).thenReturn(null);
         when(userService.getCount(null)).thenReturn(Optional.of(countUsers));
-        when(userService.getUsers(null, 0, countUsersOnPage)).thenReturn(Optional.of(users));
+        when(userService.getUsers(currentUserID, null, 0, countUsersOnPage)).thenReturn(Optional.of(users));
         when(req.getRequestDispatcher("/WEB-INF/users.jsp")).thenReturn(dispatcher);
 
         usersServlet.doGet(req, resp);
@@ -93,7 +99,7 @@ public class UsersServletTest {
         when(req.getParameter("page")).thenReturn("2");
         when(req.getParameter("fullName")).thenReturn(null);
         when(userService.getCount(null)).thenReturn(Optional.of(countUsers));
-        when(userService.getUsers(null, 10, countUsersOnPage)).thenReturn(Optional.of(users));
+        when(userService.getUsers(currentUserID, null, 10, countUsersOnPage)).thenReturn(Optional.of(users));
         when(req.getRequestDispatcher("/WEB-INF/users.jsp")).thenReturn(dispatcher);
 
         usersServlet.doGet(req, resp);
@@ -165,7 +171,7 @@ public class UsersServletTest {
         when(req.getParameter("page")).thenReturn("3");
         when(req.getParameter("countPages")).thenReturn(Long.toString(countPages));
         when(userService.getCount(null)).thenReturn(Optional.of(countUsers));
-        when(userService.getUsers(null,30, countUsersOnPage)).thenReturn(Optional.empty());
+        when(userService.getUsers(currentUserID, null,30, countUsersOnPage)).thenReturn(Optional.empty());
         when(req.getRequestDispatcher("/WEB-INF/error.jsp")).thenReturn(dispatcher);
 
         usersServlet.doGet(req, resp);
@@ -209,7 +215,7 @@ public class UsersServletTest {
         when(session.getAttribute("user")).thenReturn(user);
         when(req.getParameter("fullName")).thenReturn("Mihail");
         when(userService.getCount("Mihail")).thenReturn(Optional.of(countUsers));
-        when(userService.getUsers("Mihail", 0, countUsersOnPage)).thenReturn(Optional.of(users));
+        when(userService.getUsers(currentUserID, "Mihail", 0, countUsersOnPage)).thenReturn(Optional.of(users));
         when(req.getRequestDispatcher("/WEB-INF/users.jsp")).thenReturn(dispatcher);
 
         usersServlet.doPost(req, resp);
@@ -237,7 +243,7 @@ public class UsersServletTest {
         when(session.getAttribute("user")).thenReturn(user);
         when(req.getParameter("fullName")).thenReturn("");
         when(userService.getCount("")).thenReturn(Optional.of(countUsers));
-        when(userService.getUsers("", 0, countUsersOnPage)).thenReturn(Optional.of(users));
+        when(userService.getUsers(currentUserID, "", 0, countUsersOnPage)).thenReturn(Optional.of(users));
         when(req.getRequestDispatcher("/WEB-INF/users.jsp")).thenReturn(dispatcher);
 
         usersServlet.doPost(req, resp);
@@ -250,4 +256,5 @@ public class UsersServletTest {
         verify(resp).setStatus(HttpServletResponse.SC_OK);
         verify(dispatcher).forward(req, resp);
     }
+
 }

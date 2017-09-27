@@ -3,6 +3,7 @@ package web.servlet;
 import model.Gender;
 import model.User;
 import org.junit.Test;
+import service.NotificationService;
 import service.SecurityService;
 import service.UserService;
 import service.impl.SecurityServiceImpl;
@@ -13,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Optional;
@@ -30,7 +32,8 @@ public class RegistrationServletTest {
         final HttpServletRequest req = mock(HttpServletRequest.class);
         final HttpServletResponse resp = mock(HttpServletResponse.class);
         final HttpSession session = mock(HttpSession.class);
-        final RegistrationServlet registrationServlet = new RegistrationServlet(userService,securityService);
+        final NotificationService notificationService = mock(NotificationService.class);
+        final RegistrationServlet registrationServlet = new RegistrationServlet(userService,securityService, notificationService);
 
         when(req.getParameter("firstName")).thenReturn("Testfirstname");
         when(req.getParameter("lastName")).thenReturn("Testlastname");
@@ -59,6 +62,7 @@ public class RegistrationServletTest {
                 .password(securityService.encrypt("testPassword"))
                 .dateOfBirth(LocalDate.parse("1995-11-11"))
                 .gender(Gender.MALE)
+                .timeCreate(Timestamp.valueOf("2017-08-19 10:30:00"))
                 .build());
 
         when(userService.createUser(userIn)).thenReturn(userOut);
@@ -80,7 +84,8 @@ public class RegistrationServletTest {
         final HttpServletResponse resp = mock(HttpServletResponse.class);
         final HttpSession session = mock(HttpSession.class);
         final HashMap<String,String> errors = new HashMap<>();
-        final RegistrationServlet registrationServlet = new RegistrationServlet(userService,securityService);
+        final NotificationService notificationService = mock(NotificationService.class);
+        final RegistrationServlet registrationServlet = new RegistrationServlet(userService,securityService, notificationService);
 
         when(req.getParameter("firstName")).thenReturn("Testfirstname");
         when(req.getParameter("lastName")).thenReturn("Testlastname");
@@ -121,7 +126,8 @@ public class RegistrationServletTest {
         final HttpServletResponse resp = mock(HttpServletResponse.class);
         final HttpSession session = mock(HttpSession.class);
         final HashMap<String,String> errors = new HashMap<>();
-        final RegistrationServlet registrationServlet = new RegistrationServlet(userService,securityService);
+        final NotificationService notificationService = mock(NotificationService.class);
+        final RegistrationServlet registrationServlet = new RegistrationServlet(userService,securityService, notificationService);
 
         when(req.getParameter("firstName")).thenReturn("Testfirstname");
         when(req.getParameter("lastName")).thenReturn("Testlastname");
@@ -163,7 +169,8 @@ public class RegistrationServletTest {
         final RequestDispatcher dispatcher = mock(RequestDispatcher.class);
         final HttpServletResponse resp = mock(HttpServletResponse.class);
         final HttpSession session = mock(HttpSession.class);
-        final RegistrationServlet registrationServlet = new RegistrationServlet(userService,securityService);
+        final NotificationService notificationService = mock(NotificationService.class);
+        final RegistrationServlet registrationServlet = new RegistrationServlet(userService,securityService, notificationService);
 
         when(req.getParameter("firstName")).thenReturn("Testfirstname");
         when(req.getParameter("lastName")).thenReturn("Testlastname");

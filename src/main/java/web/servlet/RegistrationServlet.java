@@ -4,7 +4,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import model.Credentials;
 import model.Gender;
+import model.Notification;
 import model.User;
+import service.NotificationService;
 import service.SecurityService;
 import service.UserService;
 import web.servlet.utils.FormValidation;
@@ -14,6 +16,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Optional;
@@ -24,11 +27,13 @@ public class RegistrationServlet extends HttpServlet {
     private final UserService userService;
     private final SecurityService securityService;
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RegistrationServlet.class);
+    private final NotificationService notificationService;
 
     @Inject
-    public RegistrationServlet(UserService userService, SecurityService securityService) {
+    public RegistrationServlet(UserService userService, SecurityService securityService, NotificationService notificationService) {
         this.userService = userService;
         this.securityService = securityService;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -77,6 +82,12 @@ public class RegistrationServlet extends HttpServlet {
 
             Optional<User> user = userService.createUser(userIn);
             if (user.isPresent()) {
+                notificationService.addNotification(Notification.builder()
+                        .sender_id(1)
+                        .recipient_id(user.get().getId())
+                        .not_status(0)
+                        .ts_action(user.get().getTimeCreate())
+                        .build());
                 log.debug("Create user[{}] is success", user.get().getId());
                 req.getSession(true).setAttribute("user", user.get());
                 resp.setStatus(HttpServletResponse.SC_OK);

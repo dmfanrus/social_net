@@ -3,7 +3,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <fmt:setLocale value="${sessionScope.locale}"/>
 <fmt:setBundle basename="i18n.menu" var="menu"/>
-<html>
+<!DOCTYPE html>
 <head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <c:url var="bsMain" value="/webjars/bootstrap/3.3.7-1/css/bootstrap.min.css"/>
@@ -19,7 +19,6 @@
     <title><c:out value="${title}"/></title>
 </head>
 <body>
-
 <div class="container">
     <div class="row">
         <div class="col-lg-2"></div>
@@ -75,15 +74,14 @@
                 </div>
             </nav>
             <jsp:doBody/>
-
         </div>
         <div class="col-lg-2"></div>
     </div>
 </div>
-
 <footer class="footer">
     <div class="container" id="footer">
-        <p class="text-muted" style="text-align: center;">Designed by Mihail Gurko. Copyright &copy 2017. All rights reserved.</p>
+        <p class="text-muted" style="text-align: center;">Designed by Mihail Gurko. Copyright &copy 2017. All rights
+            reserved.</p>
     </div>
 </footer>
 </body>
