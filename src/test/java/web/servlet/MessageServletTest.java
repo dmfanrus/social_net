@@ -84,9 +84,9 @@ public class MessageServletTest {
 
         when(req.getSession(false)).thenReturn(session);
         when(session.getAttribute("user")).thenReturn(user);
-        when(req.getServletPath()).thenReturn("/message");
+        when(req.getServletPath()).thenReturn("/messages");
         when(conversationService.getListConversation(currentUserID)).thenReturn(Optional.of(conversations));
-        when(req.getRequestDispatcher("/WEB-INF/message.jsp")).thenReturn(dispatcher);
+        when(req.getRequestDispatcher("/WEB-INF/messages.jsp")).thenReturn(dispatcher);
 
         messageServlet.doGet(req, resp);
 
@@ -108,10 +108,10 @@ public class MessageServletTest {
 
         when(req.getSession(false)).thenReturn(session);
         when(session.getAttribute("user")).thenReturn(user);
-        when(req.getServletPath()).thenReturn("/message_1");
+        when(req.getServletPath()).thenReturn("/messages_1");
         when(conversationService.getListConversation(currentUserID)).thenReturn(Optional.of(conversations));
         when(conversationService.getListMessages(1, currentUserID)).thenReturn(Optional.of(messages));
-        when(req.getRequestDispatcher("/WEB-INF/message.jsp")).thenReturn(dispatcher);
+        when(req.getRequestDispatcher("/WEB-INF/messages.jsp")).thenReturn(dispatcher);
 
         messageServlet.doGet(req, resp);
 
@@ -137,12 +137,12 @@ public class MessageServletTest {
         when(conversationService.getListConversation(currentUserID)).thenReturn(Optional.of(conversations));
         when(conversationService.getListMessages(1, currentUserID)).thenReturn(Optional.of(messages));
         when(req.getContextPath()).thenReturn("/contextPath");
-        when(req.getServletPath()).thenReturn("/message_1");
+        when(req.getServletPath()).thenReturn("/messages_1");
 
         messageServlet.doPost(req, resp);
 
         verify(resp).setStatus(HttpServletResponse.SC_OK);
-        verify(resp).sendRedirect("/contextPath/message_1");
+        verify(resp).sendRedirect("/contextPath/messages_1");
     }
 
 }

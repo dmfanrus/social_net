@@ -13,8 +13,6 @@
 <fmt:setBundle basename="i18n.registration" var="registration"/>
 <fmt:setBundle basename="i18n.errorsMessage" var="errorsMessage"/>
 <fmt:message var="title" bundle="${registration}" key="registration.title"/>
-<%--<jsp:useBean id="errors" scope="request" type="java.util.Map"/>--%>
-<%--<jsp:useBean id="fields" scope="request" type="java.util.Map"/>--%>
 <tags:user title="${title}">
     <div class="row">
         <div class="col-lg-2"></div>

@@ -18,9 +18,10 @@ public class ConversationServiceImpl implements ConversationService{
         this.conversationDao = conversationDao;
     }
 
+
     @Override
-    public void createConversation(long currentUserID, long otherUserID) {
-        conversationDao.createConversation(currentUserID,otherUserID);
+    public Optional<Long> createConversation(long currentUserID, long otherUserID, Message message) {
+        return conversationDao.createConversation(currentUserID, otherUserID, message);
     }
 
     @Override
@@ -46,5 +47,10 @@ public class ConversationServiceImpl implements ConversationService{
     @Override
     public void deleteConversation(long conv_id) {
         conversationDao.deleteConversation(conv_id);
+    }
+
+    @Override
+    public Optional<Long> getConversationID(long currentUserID, long otherUserID) {
+        return conversationDao.getConversationID(currentUserID,otherUserID);
     }
 }

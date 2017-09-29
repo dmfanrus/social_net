@@ -15,6 +15,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,7 +25,7 @@ public class MessageServlet extends HttpServlet {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MessageServlet.class);
     private final ConversationService conversationService;
     private static final String SERVLET_PATTERN =
-            "/message_([0-9])+";
+            "/messages_([0-9])+";
 
     @Inject
     public MessageServlet(ConversationService conversationService) {
@@ -36,13 +38,13 @@ public class MessageServlet extends HttpServlet {
         long currentUserID = ((User) req.getSession(false).getAttribute("user")).getId();
         log.debug("GET - user[{}]", currentUserID);
         String servletPath = req.getServletPath();
-        if (servletPath.equals("/message")) {
+        if (servletPath.equals("/messages")) {
             Optional<List<Conversation>> conversations = conversationService.getListConversation(currentUserID);
             if (conversations.isPresent()) {
                 log.debug("List of conversations: {}", conversations.get());
                 req.setAttribute("convList", conversations.get());
                 resp.setStatus(HttpServletResponse.SC_OK);
-                req.getRequestDispatcher("/WEB-INF/message.jsp")
+                req.getRequestDispatcher("/WEB-INF/messages.jsp")
                         .forward(req, resp);
             } else {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -50,14 +52,15 @@ public class MessageServlet extends HttpServlet {
                         .forward(req, resp);
             }
         } else if (servletPath.matches(SERVLET_PATTERN)) {
-            long conv_id = Long.parseLong(servletPath.replaceFirst("/message_", ""));
+            long conv_id = Long.parseLong(servletPath.replaceFirst("/messages_", ""));
             Optional<List<Message>> messages = conversationService.getListMessages(conv_id, currentUserID);
             Optional<List<Conversation>> conversations = conversationService.getListConversation(currentUserID);
             if (conversations.isPresent() && messages.isPresent()) {
                 req.setAttribute("convList", conversations.get());
                 req.setAttribute("msgList", messages.get());
+                req.setAttribute("activ_conv_id", conv_id);
                 resp.setStatus(HttpServletResponse.SC_OK);
-                req.getRequestDispatcher("/WEB-INF/message.jsp")
+                req.getRequestDispatcher("/WEB-INF/messages.jsp")
                         .forward(req, resp);
             } else {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -80,7 +83,7 @@ public class MessageServlet extends HttpServlet {
         String message = req.getParameter("message");
         String servletPath = req.getServletPath();
         if (servletPath.matches(SERVLET_PATTERN)) {
-            long conv_id = Long.parseLong(servletPath.replaceFirst("/message_", ""));
+            long conv_id = Long.parseLong(servletPath.replaceFirst("/messages_", ""));
             conversationService.addMessage(Message.builder()
                     .sender_id(currentUserID)
                     .message(message)
@@ -89,6 +92,9 @@ public class MessageServlet extends HttpServlet {
                     .build());
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.sendRedirect(req.getContextPath() + servletPath);
+        } else {
+            resp.setStatus(HttpServletResponse.SC_OK);
+            resp.sendRedirect(req.getContextPath() + "/messages");
         }
     }
 }

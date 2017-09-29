@@ -23,6 +23,7 @@ import com.google.inject.Singleton;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
 import web.servlet.changers.ChangeRelationshipServlet;
+import web.servlet.changers.ChangerMessageServlet;
 
 import javax.servlet.annotation.WebListener;
 import javax.sql.DataSource;
@@ -59,9 +60,10 @@ public class GuiceConfig extends GuiceServletContextListener {
     private static class ServletConfigModule extends ServletModule {
         @Override
         protected void configureServlets() {
-            filter("/friends","/message","/profile_update","/logout","/users").through(LoggedInFilter.class);
+            filter("/friends","/messages","/messages_new","/profile_update","/logout","/users", "/users/changer",
+                    "/friends/changer", "/messages/changer").through(LoggedInFilter.class);
             filterRegex("/profile_[0-9]+").through(LoggedInFilter.class);
-            filterRegex("/message_[0-9]+").through(LoggedInFilter.class);
+            filterRegex("/messages_[0-9]+").through(LoggedInFilter.class);
             filter("/login","/registration").through(LoggedOutFilter.class);
             serve("/").with(RootServlet.class);
             serve("/help").with(HelpServlet.class);
@@ -69,13 +71,15 @@ public class GuiceConfig extends GuiceServletContextListener {
             serve("/registration").with(RegistrationServlet.class);
             serve("/logout").with(LogoutServlet.class);
             serveRegex("/profile_[0-9]+").with(ProfileServlet.class);
-            serveRegex("/message_[0-9]+").with(MessageServlet.class);
-            serve("/message").with(MessageServlet.class);
+            serveRegex("/messages_[0-9]+").with(MessageServlet.class);
+            serve("/messages").with(MessageServlet.class);
+            serve("/messages_new").with(MessageNewServlet.class);
             serve("/friends").with(FriendsServlet.class);
             serve("/profile_update").with(Profile_UPD_Servlet.class);
             serve("/users").with(UsersServlet.class);
             serve("/users/changer").with(ChangeRelationshipServlet.class);
             serve("/friends/changer").with(ChangeRelationshipServlet.class);
+            serve("/messages/changer").with(ChangerMessageServlet.class);
         }
     }
 

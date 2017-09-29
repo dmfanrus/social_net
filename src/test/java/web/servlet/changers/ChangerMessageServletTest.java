@@ -54,13 +54,13 @@ public class ChangerMessageServletTest {
         when(req.getParameter("conv_id")).thenReturn(String.valueOf(conv_id));
         when(req.getParameter("action")).thenReturn("deleteConversation");
         when(req.getContextPath()).thenReturn("/contextPath");
-        when(req.getServletPath()).thenReturn("/message");
+        when(req.getServletPath()).thenReturn("/messages");
 
         changerMessageServlet.doPost(req,resp);
 
         verify(conversationService).deleteConversation(conv_id);
         verify(resp).setStatus(HttpServletResponse.SC_OK);
-        verify(resp).sendRedirect("/contextPath/message");
+        verify(resp).sendRedirect("/contextPath/messages");
     }
 
     @Test
@@ -77,13 +77,13 @@ public class ChangerMessageServletTest {
         when(req.getParameter("conv_id")).thenReturn(String.valueOf(conv_id));
         when(req.getParameter("action")).thenReturn("deleteMessage");
         when(req.getContextPath()).thenReturn("/contextPath");
-        when(req.getServletPath()).thenReturn("/message_1");
+        when(req.getServletPath()).thenReturn("/messages_1");
 
         changerMessageServlet.doPost(req,resp);
 
         verify(conversationService).deleteMessage(msg_id);
         verify(resp).setStatus(HttpServletResponse.SC_OK);
-        verify(resp).sendRedirect("/contextPath/message_1");
+        verify(resp).sendRedirect("/contextPath/messages_1");
 
     }
 

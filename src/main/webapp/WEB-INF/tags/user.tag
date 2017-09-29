@@ -56,7 +56,7 @@
                                     </li>
                                     <c:url var="usersUrl" value="/users"/>
                                     <li><a href="${usersUrl}"><fmt:message bundle="${menu}" key="menu.users"/></a></li>
-                                    <c:url var="messageUrl" value="/message"/>
+                                    <c:url var="messageUrl" value="/messages"/>
                                     <li><a href="${messageUrl}"><fmt:message bundle="${menu}" key="menu.message"/></a>
                                     </li>
                                     <c:url var="friendsUrl" value="/friends"/>

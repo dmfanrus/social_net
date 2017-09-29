@@ -27,40 +27,64 @@ public class ConversationDaoImpl implements ConversationDao {
     @Override
     public void addMessage(Message message) {
         try (Connection connection = dataSource.getConnection()) {
-            final PreparedStatement select = connection.prepareStatement(
+            final PreparedStatement select1 = connection.prepareStatement(
                     "SELECT * FROM conversations " +
                             "WHERE id=?");
-            select.setLong(1, message.getConv_id());
-            select.executeQuery();
-            final ResultSet resultSet = select.getResultSet();
-            if (resultSet.next()) {
-                final PreparedStatement insert = connection.prepareStatement(
+            select1.setLong(1, message.getConv_id());
+            select1.executeQuery();
+            final ResultSet resultSet1 = select1.getResultSet();
+            if (resultSet1.next()) {
+                final PreparedStatement insert2 = connection.prepareStatement(
                         "INSERT INTO messages(sender_id,message,ts_action,conv_id,isread) " +
                                 "VALUES(?,?,?,?,?)");
-                insert.setLong(1, message.getSender_id());
-                insert.setString(2, message.getMessage());
-                insert.setTimestamp(3, message.getTs_action());
-                insert.setLong(4, message.getConv_id());
-                insert.setBoolean(5, false);
-                insert.executeUpdate();
+                insert2.setLong(1, message.getSender_id());
+                insert2.setString(2, message.getMessage());
+                insert2.setTimestamp(3, message.getTs_action());
+                insert2.setLong(4, message.getConv_id());
+                insert2.setBoolean(5, false);
+                insert2.executeUpdate();
             }
         } catch (SQLException e) {
             log.error("Failed to add message", e);
         }
     }
 
+
     @Override
-    public void createConversation(long currentUserID, long otherUserID) {
+    public Optional<Long> createConversation(long currentUserID, long otherUserID, Message message) {
         try (Connection connection = dataSource.getConnection()) {
-            final PreparedStatement insert = connection.prepareStatement(
+            final PreparedStatement insert1 = connection.prepareStatement(
                     "INSERT INTO conversations(first_user_id, second_user_id) " +
-                            "VALUES(?,?) ON CONFLICT DO NOTHING");
-            insert.setLong(1, currentUserID);
-            insert.setLong(2, otherUserID);
-            insert.executeUpdate();
+                            "VALUES(?,?) " +
+                            "ON CONFLICT " +
+                            "DO NOTHING RETURNING id");
+            insert1.setLong(1, currentUserID);
+            insert1.setLong(2, otherUserID);
+            insert1.executeQuery();
+
+            ResultSet resultSet = insert1.getResultSet();
+            if (resultSet.next()) {
+                long conv_id = resultSet.getLong(1);
+
+                final PreparedStatement insert2 = connection.prepareStatement(
+                        "INSERT INTO messages(sender_id,message,ts_action,conv_id,isread) " +
+                                "VALUES(?,?,?,?,?)");
+                insert2.setLong(1, message.getSender_id());
+                insert2.setString(2, message.getMessage());
+                insert2.setTimestamp(3, message.getTs_action());
+                insert2.setLong(4, conv_id);
+                insert2.setBoolean(5, false);
+                insert2.executeUpdate();
+
+                return Optional.of(resultSet.getLong(1));
+            } else {
+                return Optional.empty();
+            }
+
         } catch (SQLException e) {
-            log.error("Failed to create conversation", e);
+            log.error("Failed to add message", e);
         }
+        return Optional.empty();
     }
 
     @Override
@@ -82,7 +106,7 @@ public class ConversationDaoImpl implements ConversationDao {
                 update.executeUpdate();
 
                 final PreparedStatement select2 = connection.prepareStatement(
-                        "SELECT M.id, M.ts_action, M.message ,U.id , U.firstName,U.lastName " +
+                        "SELECT M.id, M.ts_action, M.message ,U.id , U.firstName,U.lastName, M.conv_id " +
                                 "FROM users U, messages M " +
                                 "WHERE M.sender_id=U.id AND M.conv_id=?" +
                                 "ORDER BY M.id ASC");
@@ -99,6 +123,7 @@ public class ConversationDaoImpl implements ConversationDao {
                                     .sender_id(resultSet2.getLong(4))
                                     .firstName(resultSet2.getString(5))
                                     .lastName(resultSet2.getString(6))
+                                    .conv_id(resultSet2.getLong(7))
                                     .build());
                 }
                 return Optional.of(messages);
@@ -114,7 +139,7 @@ public class ConversationDaoImpl implements ConversationDao {
         try (Connection connection = dataSource.getConnection()) {
             final PreparedStatement select = connection.prepareStatement(
                     "SELECT C.id AS chat_id, U.id AS other_id, U.firstName, U.lastName, " +
-                            "SUM(CASE WHEN M.isread = FALSE AND M.sender_id = U.id THEN 1 ELSE 0 END) " +
+                            "SUM(CASE WHEN M.isread = FALSE AND M.sender_id = U.id AND C.id=M.conv_id THEN 1 ELSE 0 END) " +
                             "FROM users U,conversations C, messages M " +
                             "WHERE CASE WHEN C.first_user_id = ? THEN C.second_user_id = U.id " +
                             "WHEN C.second_user_id = ? THEN C.first_user_id= U.id END " +
@@ -162,5 +187,31 @@ public class ConversationDaoImpl implements ConversationDao {
         } catch (SQLException e) {
             log.error("Failed to delete conversation", e);
         }
+    }
+
+    @Override
+    public Optional<Long> getConversationID(long currentUserID, long otherUserID) {
+        try (Connection connection = dataSource.getConnection()) {
+            long conv_id;
+            final PreparedStatement select1 = connection.prepareStatement(
+                    "SELECT id FROM conversations " +
+                            "WHERE (first_user_id=? AND second_user_id=?) " +
+                            "OR (first_user_id=? AND second_user_id=?)");
+            select1.setLong(1, currentUserID);
+            select1.setLong(2, otherUserID);
+            select1.setLong(3, otherUserID);
+            select1.setLong(4, currentUserID);
+            select1.executeQuery();
+
+            final ResultSet resultSet = select1.getResultSet();
+            if (resultSet.next()) {
+                return Optional.of(resultSet.getLong(1));
+            } else {
+                return Optional.empty();
+            }
+        } catch (SQLException e) {
+            log.error("Failed to get ID conversation", e);
+        }
+        return Optional.empty();
     }
 }
