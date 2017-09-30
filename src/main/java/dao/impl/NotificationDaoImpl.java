@@ -2,6 +2,7 @@ package dao.impl;
 
 import com.google.inject.Inject;
 import dao.NotificationDao;
+import model.ListNotifications;
 import model.Notification;
 
 import javax.sql.DataSource;
@@ -38,46 +39,12 @@ public class NotificationDaoImpl implements NotificationDao {
         }
     }
 
-    @Override
-    public void deleteAllNotifications() {
-        try (Connection connection = dataSource.getConnection()) {
-            final PreparedStatement delete = connection.prepareStatement(
-                    "DELETE FROM notifications");
-            delete.executeUpdate();
-        } catch (SQLException e) {
-            log.error("Failed to get count of users with fullname", e);
-        }
-    }
-
-    @Override
-    public void deleteAllNotificationsMonthAgoAndMore() {
-        try (Connection connection = dataSource.getConnection()) {
-            final PreparedStatement delete = connection.prepareStatement(
-                    "DELETE FROM notifications WHERE (CURRENT_DATE-ts_action)>'1 month'::INTERVAL");
-            delete.executeUpdate();
-        } catch (SQLException e) {
-            log.error("Failed to get count of users with fullname", e);
-        }
-    }
-
-    @Override
-    public void deleteAllUserNotificationsMonthAgoAndMore(long recipient_id) {
-        try (Connection connection = dataSource.getConnection()) {
-            final PreparedStatement delete = connection.prepareStatement(
-                    "DELETE FROM notifications WHERE recipient_id=? AND (CURRENT_DATE-ts_action)>'1 month'::INTERVAL");
-            delete.setLong(1, recipient_id);
-            delete.executeUpdate();
-        } catch (SQLException e) {
-            log.error("Failed to get count of users with fullname", e);
-        }
-    }
-
 
     @Override
     public Optional<List<Notification>> getNotifications(long recipient_id) {
         try (Connection connection = dataSource.getConnection()) {
             final PreparedStatement select = connection.prepareStatement(
-                    "SELECT * FROM relationships " +
+                    "SELECT * FROM notifications " +
                             "WHERE recipient_id=?");
             select.setLong(1, recipient_id);
             select.executeQuery();
@@ -103,8 +70,9 @@ public class NotificationDaoImpl implements NotificationDao {
     public Optional<List<Notification>> getNotificationsBySender(long sender_id) {
         try (Connection connection = dataSource.getConnection()) {
             final PreparedStatement select = connection.prepareStatement(
-                    "SELECT * FROM relationships " +
-                            "WHERE sender_id=?");
+                    "SELECT n.sender_id, n.recipient_id, u.firstname, u.lastname, n.action_id, n.ts_action " +
+                            "FROM notifications n, users u " +
+                            "WHERE n.sender_id=? AND u.id=n.sender_id");
             select.setLong(1, sender_id);
             select.executeQuery();
             final ResultSet resultSet = select.getResultSet();
@@ -114,8 +82,10 @@ public class NotificationDaoImpl implements NotificationDao {
                         Notification.builder()
                                 .sender_id(resultSet.getLong(1))
                                 .recipient_id(resultSet.getLong(2))
-                                .not_status(resultSet.getInt(3))
-                                .ts_action(resultSet.getTimestamp(4))
+                                .firstName(resultSet.getString(3))
+                                .lastName(resultSet.getString(4))
+                                .not_status(resultSet.getInt(5))
+                                .ts_action(resultSet.getTimestamp(6))
                                 .build());
             }
             return Optional.of(notifications);
@@ -125,116 +95,84 @@ public class NotificationDaoImpl implements NotificationDao {
         return Optional.empty();
     }
 
+
+
     @Override
-    public Optional<Long> getCountNotifications(long recipient_id) {
+    public Optional<ListNotifications> getNotificationsByInterval(long currentUserID, String interval, long start_num, long count) {
         try (Connection connection = dataSource.getConnection()) {
-            final PreparedStatement select = connection.prepareStatement(
-                    "SELECT COUNT(*) FROM relationships " +
+            final PreparedStatement select1 = connection.prepareStatement(
+                    "SELECT SUM(CASE WHEN (CURRENT_DATE-ts_action)<'1 day'::INTERVAL THEN 1 ELSE 0 END), " +
+                            "SUM(CASE WHEN (CURRENT_DATE-ts_action)<'1 week'::INTERVAL THEN 1 ELSE 0 END), " +
+                            "SUM(CASE WHEN (CURRENT_DATE-ts_action)<'1 month'::INTERVAL THEN 1 ELSE 0 END), " +
+                            "COUNT(*) " +
+                            " FROM notifications " +
                             "WHERE recipient_id=?");
-            select.setLong(1, recipient_id);
-            select.executeQuery();
-            final ResultSet resultSet = select.getResultSet();
-            if (resultSet.next()) {
-                return Optional.of(resultSet.getLong(1));
+            select1.setLong(1, currentUserID);
+            select1.executeQuery();
+            final ResultSet resultSet1 = select1.getResultSet();
+            final List<Long> counters = new ArrayList<>();
+            if (resultSet1.next()) {
+                counters.add(resultSet1.getLong(1));
+                counters.add(resultSet1.getLong(2));
+                counters.add(resultSet1.getLong(3));
+                counters.add(resultSet1.getLong(4));
+            } else {
+                return Optional.empty();
             }
-        } catch (SQLException e) {
-            log.error("Failed to get count of users with fullname", e);
-        }
-        return Optional.empty();
-    }
 
-    @Override
-    public Optional<List<Notification>> getAllNotificationsDuringDay(long recipient_id) {
-        try (Connection connection = dataSource.getConnection()) {
-            final PreparedStatement select = connection.prepareStatement(
-                    "SELECT * FROM relationships " +
-                            "WHERE recipient_id=? AND (CURRENT_DATE-ts_action)<'1 day'::INTERVAL");
-            select.setLong(1, recipient_id);
-            select.executeQuery();
-            final ResultSet resultSet = select.getResultSet();
-            final List<Notification> notifications = new ArrayList<>();
-            while (resultSet.next()) {
-                notifications.add(
-                        Notification.builder()
-                                .sender_id(resultSet.getLong(1))
-                                .recipient_id(resultSet.getLong(2))
-                                .not_status(resultSet.getInt(3))
-                                .ts_action(resultSet.getTimestamp(4))
-                                .build());
-            }
-            return Optional.of(notifications);
-        } catch (SQLException e) {
-            log.error("Failed to get count of users with fullname", e);
-        }
-        return Optional.empty();
-    }
 
-    @Override
-    public Optional<List<Notification>> getAllNotificationsDuringMonth(long recipient_id) {
-        try (Connection connection = dataSource.getConnection()) {
-            final PreparedStatement select = connection.prepareStatement(
-                    "SELECT * FROM relationships " +
-                            "WHERE recipient_id=? AND (CURRENT_DATE-ts_action)<'1 month'::INTERVAL");
-            select.setLong(1, recipient_id);
-            select.executeQuery();
-            final ResultSet resultSet = select.getResultSet();
-            final List<Notification> notifications = new ArrayList<>();
-            while (resultSet.next()) {
-                notifications.add(
-                        Notification.builder()
-                                .sender_id(resultSet.getLong(1))
-                                .recipient_id(resultSet.getLong(2))
-                                .not_status(resultSet.getInt(3))
-                                .ts_action(resultSet.getTimestamp(4))
-                                .build());
-            }
-            return Optional.of(notifications);
-        } catch (SQLException e) {
-            log.error("Failed to get count of users with fullname", e);
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<List<Notification>> getNotificationsDuringDay(long recipient_id, int start_num, int count) {
-        try (Connection connection = dataSource.getConnection()) {
-            final PreparedStatement select = connection.prepareStatement(
-                    "SELECT * FROM relationships " +
-                            "WHERE recipient_id=? AND (CURRENT_DATE-ts_action)<'1 day'::INTERVAL " +
+            final PreparedStatement select2 = connection.prepareStatement(
+                    "SELECT n.sender_id, n.recipient_id, u.firstname, u.lastname, n.action_id, n.ts_action " +
+                            "FROM notifications n, users u " +
+                            "WHERE recipient_id=? AND (CURRENT_DATE-ts_action)<?::INTERVAL " +
+                            "AND u.id=n.sender_id " +
+                            "ORDER BY ts_action DESC " +
                             "LIMIT ? OFFSET ?");
-            select.setLong(1, recipient_id);
-            select.setInt(2, count);
-            select.setInt(3, start_num);
+            select2.setLong(1, currentUserID);
+            select2.setString(2, interval);
+            select2.setLong(3, count);
+            select2.setLong(4, start_num);
+            select2.executeQuery();
+            final ResultSet resultSet2 = select2.getResultSet();
+            final List<Notification> notifications = new ArrayList<>();
+            while (resultSet2.next()) {
+                notifications.add(
+                        Notification.builder()
+                                .sender_id(resultSet2.getLong(1))
+                                .recipient_id(resultSet2.getLong(2))
+                                .firstName(resultSet2.getString(3))
+                                .lastName(resultSet2.getString(4))
+                                .not_status(resultSet2.getInt(5))
+                                .ts_action(resultSet2.getTimestamp(6))
+                                .build());
+            }
+
+            return Optional.of(ListNotifications
+                    .builder()
+                    .notificationList(notifications)
+                    .countrs(counters)
+                    .build());
+        } catch (SQLException e) {
+            log.error("Failed to get count of users with fullname", e);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Long> getCountNotificationsByInterval(long currentUserID, String interval) {
+        try (Connection connection = dataSource.getConnection()) {
+            final PreparedStatement select = connection.prepareStatement(
+                    "SELECT COUNT(*) FROM notifications " +
+                            "WHERE recipient_id=? AND (CURRENT_DATE-ts_action)<?::INTERVAL");
+            select.setLong(1, currentUserID);
+            select.setString(2, interval);
             select.executeQuery();
             final ResultSet resultSet = select.getResultSet();
             final List<Notification> notifications = new ArrayList<>();
-            while (resultSet.next()) {
-                notifications.add(
-                        Notification.builder()
-                                .sender_id(resultSet.getLong(1))
-                                .recipient_id(resultSet.getLong(2))
-                                .not_status(resultSet.getInt(3))
-                                .ts_action(resultSet.getTimestamp(4))
-                                .build());
-            }
-            return Optional.of(notifications);
-        } catch (SQLException e) {
-            log.error("Failed to get count of users with fullname", e);
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Long> getCountNotificationsDuringDay(long recipient_id) {
-        try (Connection connection = dataSource.getConnection()) {
-            final PreparedStatement select = connection.prepareStatement(
-                    "SELECT COUNT(*) FROM relationships " +
-                            "WHERE recipient_id=? AND (CURRENT_DATE-ts_action)<'1 day'::INTERVAL");
-            select.setLong(1, recipient_id);
-            select.executeQuery();
-            final ResultSet resultSet = select.getResultSet();
             if (resultSet.next()) {
                 return Optional.of(resultSet.getLong(1));
+            } else {
+                return Optional.empty();
             }
         } catch (SQLException e) {
             log.error("Failed to get count of users with fullname", e);
@@ -242,99 +180,4 @@ public class NotificationDaoImpl implements NotificationDao {
         return Optional.empty();
     }
 
-    @Override
-    public Optional<List<Notification>> getNotificationsDuringMonth(long recipient_id, int start_num, int count) {
-        try (Connection connection = dataSource.getConnection()) {
-            final PreparedStatement select = connection.prepareStatement(
-                    "SELECT * FROM relationships " +
-                            "WHERE recipient_id=? AND (CURRENT_DATE-ts_action)<'1 month'::INTERVAL " +
-                            "LIMIT ? OFFSET ?");
-            select.setLong(1, recipient_id);
-            select.setInt(2, count);
-            select.setInt(3, start_num);
-            select.executeQuery();
-            final ResultSet resultSet = select.getResultSet();
-            final List<Notification> notifications = new ArrayList<>();
-            while (resultSet.next()) {
-                notifications.add(
-                        Notification.builder()
-                                .sender_id(resultSet.getLong(1))
-                                .recipient_id(resultSet.getLong(2))
-                                .not_status(resultSet.getInt(3))
-                                .ts_action(resultSet.getTimestamp(4))
-                                .build());
-            }
-            return Optional.of(notifications);
-        } catch (SQLException e) {
-            log.error("Failed to get count of users with fullname", e);
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Long> getCountNotificationsDuringMonth(long recipient_id) {
-        try (Connection connection = dataSource.getConnection()) {
-            final PreparedStatement select = connection.prepareStatement(
-                    "SELECT COUNT(*) FROM relationships " +
-                            "WHERE recipient_id=? AND (CURRENT_DATE-ts_action)<'1 month'::INTERVAL");
-            select.setLong(1, recipient_id);
-            select.executeQuery();
-            final ResultSet resultSet = select.getResultSet();
-            if (resultSet.next()) {
-                return Optional.of(resultSet.getLong(1));
-            }
-        } catch (SQLException e) {
-            log.error("Failed to get count of users with fullname", e);
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<List<Notification>> getNotificationsByDate(long recipient_id, Timestamp ts, int start_num, int count) {
-        try (Connection connection = dataSource.getConnection()) {
-            final PreparedStatement select = connection.prepareStatement(
-                    "SELECT * FROM relationships " +
-                            "WHERE recipient_id=? AND ts_action<?" +
-                            "LIMIT ? OFFSET ?");
-            select.setLong(1, recipient_id);
-            select.setTimestamp(2, ts);
-            select.setInt(3, count);
-            select.setInt(4, start_num);
-            select.executeQuery();
-            final ResultSet resultSet = select.getResultSet();
-            final List<Notification> notifications = new ArrayList<>();
-            while (resultSet.next()) {
-                notifications.add(
-                        Notification.builder()
-                                .sender_id(resultSet.getLong(1))
-                                .recipient_id(resultSet.getLong(2))
-                                .not_status(resultSet.getInt(3))
-                                .ts_action(resultSet.getTimestamp(4))
-                                .build());
-            }
-            return Optional.of(notifications);
-        } catch (SQLException e) {
-            log.error("Failed to get count of users with fullname", e);
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Long> getCountNotificationsByDate(long recipient_id, Timestamp ts) {
-        try (Connection connection = dataSource.getConnection()) {
-            final PreparedStatement select = connection.prepareStatement(
-                    "SELECT COUNT(*) FROM relationships " +
-                            "WHERE recipient_id=? AND ts_action<?");
-            select.setLong(1, recipient_id);
-            select.setTimestamp(2, ts);
-            select.executeQuery();
-            final ResultSet resultSet = select.getResultSet();
-            if (resultSet.next()) {
-                return Optional.of(resultSet.getLong(1));
-            }
-        } catch (SQLException e) {
-            log.error("Failed to get count of users with fullname", e);
-        }
-        return Optional.empty();
-    }
 }

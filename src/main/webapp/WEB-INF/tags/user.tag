@@ -62,8 +62,13 @@
                                     <c:url var="friendsUrl" value="/friends"/>
                                     <li><a href="${friendsUrl}"><fmt:message bundle="${menu}" key="menu.friends"/></a>
                                     </li>
-                                    <c:url var="helpUrl" value="/help"/>
-                                    <li><a href="${helpUrl}"><fmt:message bundle="${menu}" key="menu.help"/></a></li>
+                                    <c:url var="notificationsUrl" value="/notifications">
+                                        <c:param name="setInterval" value="day"/>
+                                    </c:url>
+                                    <li><a href="${notificationsUrl}"><fmt:message bundle="${menu}" key="menu.notifications"/></a>
+                                    </li>
+                                    <%--<c:url var="helpUrl" value="/help"/>--%>
+                                    <%--<li><a href="${helpUrl}"><fmt:message bundle="${menu}" key="menu.help"/></a></li>--%>
                                     <c:url var="loginUrl" value="/logout"/>
                                     <li><a href="${loginUrl}"><fmt:message bundle="${menu}" key="menu.loginOut"/></a>
                                     </li>

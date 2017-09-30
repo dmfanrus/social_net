@@ -14,6 +14,8 @@ public class Notification {
     long id;
     long sender_id;
     long recipient_id;
+    String firstName;
+    String lastName;
     int not_status;
     Timestamp ts_action;
 
@@ -27,6 +29,14 @@ public class Notification {
 
     public long getRecipient_id() {
         return recipient_id;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
     }
 
     public int getNot_status() {
@@ -43,9 +53,10 @@ public class Notification {
                 "id=" + id +
                 ", sender_id=" + sender_id +
                 ", recipient_id=" + recipient_id +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
                 ", not_status=" + not_status +
                 ", ts_action=" + ts_action +
                 '}';
     }
-
 }

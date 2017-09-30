@@ -2,10 +2,10 @@ package service.impl;
 
 import com.google.inject.Inject;
 import dao.NotificationDao;
+import model.ListNotifications;
 import model.Notification;
 import service.NotificationService;
 
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,33 +25,8 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void deleteAllNotifications() {
-        notificationDao.deleteAllNotifications();
-    }
-
-    @Override
-    public void deleteAllNotificationsMonthAgoAndMore() {
-        notificationDao.deleteAllNotificationsMonthAgoAndMore();
-    }
-
-    @Override
-    public void deleteAllUserNotificationsMonthAgoAndMore(long recipientID) {
-        notificationDao.deleteAllUserNotificationsMonthAgoAndMore(recipientID);
-    }
-
-    @Override
     public Optional<List<Notification>> getAllNotificationsByRecipient(long recipientID) {
         return notificationDao.getNotifications(recipientID);
-    }
-
-    @Override
-    public Optional<List<Notification>> getAllNotificationsDuringDay(long recipientID) {
-        return notificationDao.getAllNotificationsDuringDay(recipientID);
-    }
-
-    @Override
-    public Optional<List<Notification>> getAllNotificationsDuringMonth(long recipientID) {
-        return notificationDao.getAllNotificationsDuringMonth(recipientID);
     }
 
     @Override
@@ -60,39 +35,46 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public Optional<Long> getCountNotifications(long recipientID) {
-        return notificationDao.getCountNotifications(recipientID);
+    public Optional<ListNotifications> getNotificationsByDifferentInterval(long currentUserID, String timeInterval, long start_num, long counts) {
+        switch (timeInterval){
+            case "day":{
+                return notificationDao.getNotificationsByInterval(currentUserID, "1 day", start_num, counts);
+            }
+            case "week":{
+                return notificationDao.getNotificationsByInterval(currentUserID, "1 week", start_num, counts);
+            }
+            case "month":{
+                return notificationDao.getNotificationsByInterval(currentUserID, "1 month", start_num, counts);
+            }
+            case "year":{
+                return notificationDao.getNotificationsByInterval(currentUserID, "1 year", start_num, counts);
+            }
+            default:{
+                return Optional.empty();
+            }
+        }
     }
+
 
     @Override
-    public Optional<List<Notification>> getNotificationsDuringDay(long recipientID, int start_num, int count) {
-        return notificationDao.getNotificationsDuringDay(recipientID,start_num,count);
+    public Optional<Long> getCountNotificationsByDifferentInterval(long currentUserID, String timeInterval) {
+        switch (timeInterval){
+            case "day":{
+                return notificationDao.getCountNotificationsByInterval(currentUserID, "1 day");
+            }
+            case "week":{
+                return notificationDao.getCountNotificationsByInterval(currentUserID, "1 week");
+            }
+            case "month":{
+                return notificationDao.getCountNotificationsByInterval(currentUserID, "1 month");
+            }
+            case "year":{
+                return notificationDao.getCountNotificationsByInterval(currentUserID, "1 year");
+            }
+            default:{
+                return Optional.empty();
+            }
+        }
     }
-
-    @Override
-    public Optional<Long> getCountNotificationsDuringDay(long recipientID) {
-        return notificationDao.getCountNotificationsDuringDay(recipientID);
-    }
-
-    @Override
-    public Optional<List<Notification>> getNotificationsDuringMonth(long recipientID, int start_num, int count) {
-        return notificationDao.getNotificationsDuringMonth(recipientID, start_num, count);
-    }
-
-    @Override
-    public Optional<Long> getCountNotificationsDuringMonth(long recipientID) {
-        return notificationDao.getCountNotificationsDuringMonth(recipientID);
-    }
-
-    @Override
-    public Optional<List<Notification>> getNotificationsByDate(long recipientID, Timestamp ts, int start_num, int count) {
-        return notificationDao.getNotificationsByDate(recipientID,ts,start_num,count);
-    }
-
-    @Override
-    public Optional<Long> getCountNotificationsByDate(long recipientID, Timestamp ts) {
-        return notificationDao.getCountNotificationsByDate(recipientID,ts);
-    }
-
 
 }
