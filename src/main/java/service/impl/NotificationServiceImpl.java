@@ -36,45 +36,12 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public Optional<ListNotifications> getNotificationsByDifferentInterval(long currentUserID, String timeInterval, long start_num, long counts) {
-        switch (timeInterval){
-            case "day":{
-                return notificationDao.getNotificationsByInterval(currentUserID, "1 day", start_num, counts);
-            }
-            case "week":{
-                return notificationDao.getNotificationsByInterval(currentUserID, "1 week", start_num, counts);
-            }
-            case "month":{
-                return notificationDao.getNotificationsByInterval(currentUserID, "1 month", start_num, counts);
-            }
-            case "year":{
-                return notificationDao.getNotificationsByInterval(currentUserID, "1 year", start_num, counts);
-            }
-            default:{
-                return Optional.empty();
-            }
-        }
+        return notificationDao.getNotificationsByInterval(currentUserID, timeInterval, start_num, counts);
     }
-
 
     @Override
     public Optional<Long> getCountNotificationsByDifferentInterval(long currentUserID, String timeInterval) {
-        switch (timeInterval){
-            case "day":{
-                return notificationDao.getCountNotificationsByInterval(currentUserID, "1 day");
-            }
-            case "week":{
-                return notificationDao.getCountNotificationsByInterval(currentUserID, "1 week");
-            }
-            case "month":{
-                return notificationDao.getCountNotificationsByInterval(currentUserID, "1 month");
-            }
-            case "year":{
-                return notificationDao.getCountNotificationsByInterval(currentUserID, "1 year");
-            }
-            default:{
-                return Optional.empty();
-            }
-        }
+        return notificationDao.getCountNotificationsByInterval(currentUserID, timeInterval);
     }
 
 }

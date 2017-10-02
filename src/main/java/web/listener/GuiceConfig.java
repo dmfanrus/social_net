@@ -77,7 +77,7 @@ public class GuiceConfig extends GuiceServletContextListener {
             serve("/messages_new").with(MessageNewServlet.class);
             serve("/friends").with(FriendsServlet.class);
             serve("/notifications").with(NotificationServlet.class);
-            serve("/profile_update").with(Profile_UPD_Servlet.class);
+            serve("/profile_update").with(ProfileUpdateServlet.class);
             serve("/users").with(UsersServlet.class);
             serve("/users/changer").with(ChangeRelationshipServlet.class);
             serve("/friends/changer").with(ChangeRelationshipServlet.class);

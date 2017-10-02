@@ -10,8 +10,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Singleton
-public class Profile_UPD_Servlet extends HttpServlet{
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Profile_UPD_Servlet.class);
+public class ProfileUpdateServlet extends HttpServlet{
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProfileUpdateServlet.class);
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

@@ -12,7 +12,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Singleton
@@ -21,27 +23,40 @@ public class NotificationServlet extends HttpServlet{
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NotificationServlet.class);
     private static final int NOTIFICATIONSONPAGE = 10;
     private final NotificationService notificationService;
+    private static final Map<String,String> mapTimeInterval = new HashMap<>();
+    static{
+        mapTimeInterval.put("day","1 day");
+        mapTimeInterval.put("week","1 week");
+        mapTimeInterval.put("month","1 month");
+        mapTimeInterval.put("year","1 year");
+    }
 
     @Inject
     public NotificationServlet(NotificationService notificationService) {
         this.notificationService = notificationService;
+
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
-        long currentUserID = ((User) req.getSession(false).getAttribute("user")).getId();
+        final long currentUserID = ((User) req.getSession(false).getAttribute("user")).getId();
         log.debug("GET - user[{}]", currentUserID);
 
-        Optional<ListNotifications> notifications;
-        String currPageS = req.getParameter("page");
-        String timeInterval = req.getParameter("setInterval");
-
+        final String currPageS = req.getParameter("page");
+        final String timeInterval = req.getParameter("setInterval");
         long currentPage = currPageS == null ? 1 : Long.parseLong(currPageS);
-        Optional<Long> countNotifications = notificationService.getCountNotificationsByDifferentInterval(currentUserID, timeInterval);
+
+        if(!mapTimeInterval.containsKey(timeInterval)){
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            req.getRequestDispatcher("/WEB-INF/not_found.jsp").forward(req, resp);
+            return;
+        }
+
+        Optional<Long> countNotifications = notificationService.getCountNotificationsByDifferentInterval(currentUserID, mapTimeInterval.get(timeInterval));
 
         if (countNotifications.isPresent()) {
-            long countPages = (long) Math.ceil((float) countNotifications.get() / NOTIFICATIONSONPAGE);
+            final long countPages = (long) Math.ceil((float) countNotifications.get() / NOTIFICATIONSONPAGE);
             if (countPages < currentPage || currentPage < 1) {
                 if (countPages!=0 && currentPage!=1) {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -49,12 +64,12 @@ public class NotificationServlet extends HttpServlet{
                     return;
                 }
             }
-            notifications = notificationService.getNotificationsByDifferentInterval(currentUserID, timeInterval,
-                    (currentPage-1) * NOTIFICATIONSONPAGE, NOTIFICATIONSONPAGE);
-            if (notifications.isPresent()) {
+            final Optional<ListNotifications> notifications = notificationService.getNotificationsByDifferentInterval(
+                    currentUserID, mapTimeInterval.get(timeInterval), (currentPage-1) * NOTIFICATIONSONPAGE, NOTIFICATIONSONPAGE);
 
-                long startPage = currentPage - 2 > 0 ? currentPage - 2 : 1;
-                long endPage = startPage + 4 <= countPages ? startPage + 4 : countPages;
+            if (notifications.isPresent()) {
+                final long startPage = currentPage - 2 > 0 ? currentPage - 2 : 1;
+                final long endPage = startPage + 4 <= countPages ? startPage + 4 : countPages;
                 req.setAttribute("startPage", startPage);
                 req.setAttribute("endPage", endPage);
                 req.setAttribute("notificationsList", notifications.get());
@@ -62,7 +77,6 @@ public class NotificationServlet extends HttpServlet{
                 req.setAttribute("activeInterval", timeInterval);
                 req.setAttribute("page", currentPage);
                 resp.setStatus(HttpServletResponse.SC_OK);
-                log.debug("GET - countPages={}  currentPage={}", countPages, currentPage);
                 req.getRequestDispatcher("/WEB-INF/notifications.jsp")
                         .forward(req, resp);
             } else {

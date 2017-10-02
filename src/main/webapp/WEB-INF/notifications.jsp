@@ -128,7 +128,7 @@
                                         <c:param name="page" value="${(page-1)}"/>
                                         <c:param name="setInterval" value="${activeInterval}"/>
                                     </c:url>
-                                    <a href="${usersUrl}" aria-label="Previous">
+                                    <a href="${notificationsUrl}" aria-label="Previous">
                                         <span aria-hidden="true">&laquo;</span>
                                     </a>
                                 </li>
