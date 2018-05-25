@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -80,7 +79,8 @@ public class MessageServletTest {
         final HttpServletResponse resp = mock(HttpServletResponse.class);
         final HttpSession session = mock(HttpSession.class);
         final ConversationService conversationService = mock(ConversationService.class);
-        final MessageServlet messageServlet = new MessageServlet(conversationService);
+        final RelationshipService relationshipService= mock(RelationshipService.class);
+        final MessageServlet messageServlet = new MessageServlet(conversationService, relationshipService);
 
         when(req.getSession(false)).thenReturn(session);
         when(session.getAttribute("user")).thenReturn(user);
@@ -104,7 +104,8 @@ public class MessageServletTest {
         final HttpServletResponse resp = mock(HttpServletResponse.class);
         final HttpSession session = mock(HttpSession.class);
         final ConversationService conversationService = mock(ConversationService.class);
-        final MessageServlet messageServlet = new MessageServlet(conversationService);
+        final RelationshipService relationshipService= mock(RelationshipService.class);
+        final MessageServlet messageServlet = new MessageServlet(conversationService, relationshipService);
 
         when(req.getSession(false)).thenReturn(session);
         when(session.getAttribute("user")).thenReturn(user);
@@ -128,7 +129,8 @@ public class MessageServletTest {
         final HttpServletResponse resp = mock(HttpServletResponse.class);
         final HttpSession session = mock(HttpSession.class);
         final ConversationService conversationService = mock(ConversationService.class);
-        final MessageServlet messageServlet = new MessageServlet(conversationService);
+        final RelationshipService relationshipService= mock(RelationshipService.class);
+        final MessageServlet messageServlet = new MessageServlet(conversationService, relationshipService);
 
         when(req.getSession(false)).thenReturn(session);
         when(session.getAttribute("user")).thenReturn(user);
@@ -136,6 +138,7 @@ public class MessageServletTest {
         when(req.getParameter("conv_id")).thenReturn("1");
         when(conversationService.getListConversation(currentUserID)).thenReturn(Optional.of(conversations));
         when(conversationService.getListMessages(1, currentUserID)).thenReturn(Optional.of(messages));
+        when(relationshipService.getRelationStatusByConvID(1)).thenReturn(Optional.of(RelationStatus.UNKNOW));
         when(req.getContextPath()).thenReturn("/contextPath");
         when(req.getServletPath()).thenReturn("/messages_1");
 

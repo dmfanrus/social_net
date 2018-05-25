@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface NotificationDao {
 
 
-    void AddNotification(Notification notification);
+    void addNotification(Notification notification);
 
     Optional<List<Notification>> getNotifications(long recipient_id);
     Optional<List<Notification>> getNotificationsBySender(long sender_id);

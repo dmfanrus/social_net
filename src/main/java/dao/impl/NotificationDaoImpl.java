@@ -24,7 +24,7 @@ public class NotificationDaoImpl implements NotificationDao {
 
 
     @Override
-    public void AddNotification(Notification notification) {
+    public void addNotification(Notification notification) {
         try (Connection connection = dataSource.getConnection()) {
             final PreparedStatement insert = connection.prepareStatement(
                     "INSERT INTO notifications(sender_id, recipient_id, action_id, ts_action) " +
@@ -36,6 +36,8 @@ public class NotificationDaoImpl implements NotificationDao {
             insert.executeUpdate();
         } catch (SQLException e) {
             log.error("Failed to get count of users with fullname", e);
+        } finally {
+
         }
     }
 
@@ -47,8 +49,7 @@ public class NotificationDaoImpl implements NotificationDao {
                     "SELECT * FROM notifications " +
                             "WHERE recipient_id=?");
             select.setLong(1, recipient_id);
-            select.executeQuery();
-            final ResultSet resultSet = select.getResultSet();
+            final ResultSet resultSet = select.executeQuery();
             final List<Notification> notifications = new ArrayList<>();
             while (resultSet.next()) {
                 notifications.add(
@@ -62,6 +63,7 @@ public class NotificationDaoImpl implements NotificationDao {
             return Optional.of(notifications);
         } catch (SQLException e) {
             log.error("Failed to get count of users with fullname", e);
+        } finally {
         }
         return Optional.empty();
     }
@@ -74,8 +76,7 @@ public class NotificationDaoImpl implements NotificationDao {
                             "FROM notifications n, users u " +
                             "WHERE n.sender_id=? AND u.id=n.sender_id");
             select.setLong(1, sender_id);
-            select.executeQuery();
-            final ResultSet resultSet = select.getResultSet();
+            final ResultSet resultSet = select.executeQuery();
             final List<Notification> notifications = new ArrayList<>();
             while (resultSet.next()) {
                 notifications.add(
@@ -91,10 +92,11 @@ public class NotificationDaoImpl implements NotificationDao {
             return Optional.of(notifications);
         } catch (SQLException e) {
             log.error("Failed to get count of users with fullname", e);
+        } finally {
+
         }
         return Optional.empty();
     }
-
 
 
     @Override
@@ -108,8 +110,7 @@ public class NotificationDaoImpl implements NotificationDao {
                             " FROM notifications " +
                             "WHERE recipient_id=?");
             select1.setLong(1, currentUserID);
-            select1.executeQuery();
-            final ResultSet resultSet1 = select1.getResultSet();
+            final ResultSet resultSet1 = select1.executeQuery();
             final List<Long> counters = new ArrayList<>();
             if (resultSet1.next()) {
                 counters.add(resultSet1.getLong(1));
@@ -132,8 +133,7 @@ public class NotificationDaoImpl implements NotificationDao {
             select2.setString(2, interval);
             select2.setLong(3, count);
             select2.setLong(4, start_num);
-            select2.executeQuery();
-            final ResultSet resultSet2 = select2.getResultSet();
+            final ResultSet resultSet2 = select2.executeQuery();
             final List<Notification> notifications = new ArrayList<>();
             while (resultSet2.next()) {
                 notifications.add(
@@ -166,9 +166,7 @@ public class NotificationDaoImpl implements NotificationDao {
                             "WHERE recipient_id=? AND (CURRENT_DATE-ts_action)<?::INTERVAL");
             select.setLong(1, currentUserID);
             select.setString(2, interval);
-            select.executeQuery();
-            final ResultSet resultSet = select.getResultSet();
-            final List<Notification> notifications = new ArrayList<>();
+            final ResultSet resultSet = select.executeQuery();
             if (resultSet.next()) {
                 return Optional.of(resultSet.getLong(1));
             } else {

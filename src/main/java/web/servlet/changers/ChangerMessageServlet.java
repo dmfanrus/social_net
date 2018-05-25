@@ -61,6 +61,7 @@ public class ChangerMessageServlet extends HttpServlet {
             case "deleteConversation": {
                 if (conv_idS != null && !conv_idS.isEmpty()) {
                     long conv_id = Long.parseLong(conv_idS);
+
                     conversationService.deleteConversation(conv_id);
                     resp.setStatus(HttpServletResponse.SC_OK);
                     resp.sendRedirect(req.getContextPath() + "/messages");

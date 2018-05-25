@@ -4,9 +4,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import model.Conversation;
 import model.Message;
+import model.RelationStatus;
 import model.User;
 import service.ConversationService;
-import service.UserService;
+import service.RelationshipService;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -15,8 +16,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,12 +23,14 @@ import java.util.Optional;
 public class MessageServlet extends HttpServlet {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MessageServlet.class);
     private final ConversationService conversationService;
+    private final RelationshipService relationshipService;
     private static final String SERVLET_PATTERN =
             "/messages_([0-9])+";
 
     @Inject
-    public MessageServlet(ConversationService conversationService) {
+    public MessageServlet(ConversationService conversationService, RelationshipService relationshipService) {
         this.conversationService = conversationService;
+        this.relationshipService = relationshipService;
     }
 
     @Override
@@ -84,17 +85,28 @@ public class MessageServlet extends HttpServlet {
         String servletPath = req.getServletPath();
         if (servletPath.matches(SERVLET_PATTERN)) {
             long conv_id = Long.parseLong(servletPath.replaceFirst("/messages_", ""));
-            conversationService.addMessage(Message.builder()
-                    .sender_id(currentUserID)
-                    .message(message)
-                    .ts_action(Timestamp.valueOf(LocalDateTime.now()))
-                    .conv_id(conv_id)
-                    .build());
-            resp.setStatus(HttpServletResponse.SC_OK);
-            resp.sendRedirect(req.getContextPath() + servletPath);
-        } else {
-            resp.setStatus(HttpServletResponse.SC_OK);
-            resp.sendRedirect(req.getContextPath() + "/messages");
+            Optional<RelationStatus> relationStatus = relationshipService.getRelationStatusByConvID(conv_id);
+            if (relationStatus.isPresent()) {
+                RelationStatus rel = relationStatus.get();
+                if (rel != RelationStatus.BLOCKEDBYOTHER && rel != RelationStatus.BLOCKEDBYME) {
+                    conversationService.addMessage(Message.builder()
+                            .sender_id(currentUserID)
+                            .message(message)
+                            .ts_action(Timestamp.valueOf(LocalDateTime.now()))
+                            .conv_id(conv_id)
+                            .build());
+                }
+                resp.setStatus(HttpServletResponse.SC_OK);
+                resp.sendRedirect(req.getContextPath() + servletPath);
+                return;
+            } else {
+                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                req.getRequestDispatcher("/WEB-INF/error.jsp").forward(req, resp);
+                return;
+            }
         }
+        resp.setStatus(HttpServletResponse.SC_OK);
+        resp.sendRedirect(req.getContextPath() + "/messages");
+        return;
     }
 }

@@ -11,7 +11,9 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <fmt:setLocale value="${sessionScope.locale}"/>
 <fmt:setBundle basename="i18n.update_profile" var="update_profile"/>
-<fmt:message var="title" bundle="${update_profile}" key="update_profile.title"/>
+<fmt:setBundle basename="i18n.errorsMessage" var="errorsMessage"/>
+<fmt:message var="title" bundle="${update_profile}" key="update_profile.title_profile"/>
+<jsp:useBean id="user" type="model.User" scope="session"/>
 
 <tags:user title="${title}">
     <div class="row">
@@ -22,6 +24,17 @@
                     <div class="col-lg-1"></div>
                     <div class="col-lg-7">
                         <h2 class="text-center"><c:out value="${title}"/></h2>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-lg-1"></div>
+                    <div class="col-lg-7">
+                        <c:url var="userUrl" value="/profile_${currentUser.id}"/>
+                        <a href="${userUrl}">
+                            <img class="img-rounded img-responsive center-block" align="middle"
+                                 src="${pageContext.request.contextPath}/resources/img/avatar_default.png">
+                        </a>
                     </div>
                 </div>
                 <c:choose>
@@ -39,12 +52,20 @@
                         <br>
                     </c:otherwise>
                 </c:choose>
+            </form>
+            <%--<c:url var="uploadPhoto" value="/avatar/changer"/>--%>
+            <%--<form action="${uploadPhoto}" method="post" enctype="multipart/form-data">--%>
+                <%--<input name="data" type="file"><br>--%>
+                <%--<input type="submit"><fmt:message bundle="${update_profile}" key="update_profile.loadAvatar"/><br>--%>
+            <%--</form>--%>
+            <c:url var="updateProfileUrl" value="/profile/changer"/>
+            <form class="form-horizontal" name="changeProfileForm" action="${updateProfileUrl}" method="post">
                 <div class="form-group">
                     <div class="col-lg-1"></div>
                     <div class="col-lg-7">
                         <input class="form-control"
                                placeholder="<fmt:message bundle="${update_profile}" key="update_profile.firstName"/>"
-                               id="firstName" name="firstName" value="<c:out value="${fields['firstName']}"/>">
+                               id="firstName" name="firstName" value="<c:out value="${user.firstName}"/>">
                     </div>
                     <c:choose>
                         <c:when test="${not empty errors['firstName']}">
@@ -71,7 +92,7 @@
                     <div class="col-lg-7">
                         <input class="form-control"
                                placeholder="<fmt:message bundle="${update_profile}" key="update_profile.lastName"/>"
-                               id="lastName" name="lastName" value="<c:out value="${fields['lastName']}"/>">
+                               id="lastName" name="lastName" value="<c:out value="${user.lastName}"/>">
                     </div>
                     <c:choose>
                         <c:when test="${not empty errors['lastName']}">
@@ -98,7 +119,7 @@
                     <div class="col-lg-7">
                         <input type="text" class="form-control"
                                placeholder="<fmt:message bundle="${update_profile}" key="update_profile.username"/>"
-                               id="username" name="username" value="<c:out value="${fields['login']}"/>">
+                               id="username" name="username" value="<c:out value="${user.login}"/>">
                     </div>
                     <c:choose>
                         <c:when test="${not empty errors['login']}">
@@ -123,29 +144,9 @@
                 <div class="form-group">
                     <div class="col-lg-1"></div>
                     <div class="col-lg-7">
-                        <input type="password" class="form-control"
-                               placeholder="<fmt:message bundle="${update_profile}" key="update_profile.password"/>"
-                               id="password" name="password">
-                    </div>
-                    <c:choose>
-                        <c:when test="${not empty errors['password']}">
-                            <div class="col-lg-4-offset has-error">
-                                <label class=" control-label" style="text-align: left">
-                                    <span class="glyphicon glyphicon-remove"></span><fmt:message
-                                        bundle="${errorsMessage}"
-                                        key="errorsMessage.${errors['password']}"/></label>
-                            </div>
-                        </c:when>
-                    </c:choose>
-                </div>
-
-
-                <div class="form-group">
-                    <div class="col-lg-1"></div>
-                    <div class="col-lg-7">
                         <input type="email" class="form-control"
                                placeholder="<fmt:message bundle="${update_profile}" key="update_profile.email"/>"
-                               id="email" name="email" value="<c:out value="${fields['email']}"/>">
+                               id="email" name="email" value="<c:out value="${user.email}"/>">
                     </div>
                     <c:choose>
                         <c:when test="${not empty errors['email']}">
@@ -175,7 +176,7 @@
                     </div>
                     <div class="col-lg-4">
                         <input type="date" id="date" name="dateOfBirth" class="form-control"
-                               value="${fields['dateOfBirth']}">
+                               value="${user.dateOfBirth}">
                     </div>
                     <c:choose>
                         <c:when test="${not empty errors['dateOfBirth']}">
@@ -204,10 +205,10 @@
                     </div>
                     <div class="col-lg-4">
                         <label class="radio-inline"><input type="radio" name="gender" id="gender" value="M"
-                                                           <c:if test="${fields['gender']=='M'}">checked</c:if>>
+                                                           <c:if test="${user.gender.name()=='MALE'}">checked</c:if>>
                             <fmt:message bundle="${update_profile}" key="update_profile.genderM"/></label>
                         <label class="radio-inline"><input type="radio" name="gender" id="gender" value="F"
-                                                           <c:if test="${fields['gender']=='F'}">checked</c:if>>
+                                                           <c:if test="${user.gender.name()=='FEMALE'}">checked</c:if>>
                             <fmt:message bundle="${update_profile}" key="update_profile.genderW"/></label>
                     </div>
 
@@ -231,12 +232,40 @@
                     </c:choose>
                 </div>
 
+                <div class="form-group">
+                    <div class="col-lg-1"></div>
+                    <div class="col-lg-7">
+                        <input type="password" class="form-control"
+                               placeholder="<fmt:message bundle="${update_profile}" key="update_profile.currentPassword"/>"
+                               id="currentPassword" name="currentPassword">
+                    </div>
+                    <c:choose>
+                        <c:when test="${not empty errors['password']}">
+                            <div class="col-lg-4-offset has-error">
+                                <label class=" control-label" style="text-align: left">
+                                    <span class="glyphicon glyphicon-remove"></span><fmt:message
+                                        bundle="${errorsMessage}"
+                                        key="errorsMessage.${errors['password']}"/></label>
+                            </div>
+                        </c:when>
+                    </c:choose>
+                </div>
 
                 <div class="form-group">
                     <div class="col-lg-1"></div>
                     <div class="col-lg-7">
                         <button type="submit" class="btn-primary btn-lg btn-block active"><fmt:message
                                 bundle="${update_profile}" key="update_profile.enter"/></button>
+                    </div>
+                </div>
+            </form>
+            <c:url var="changeMyPassword" value="/password/changer"/>
+            <form class="form-horizontal" action="${changeMyPassword}" method="get">
+                <div class="form-group">
+                    <div class="col-lg-1"></div>
+                    <div class="col-lg-7">
+                        <button type="submit" class="btn-primary btn-lg btn-block active"><fmt:message
+                                bundle="${update_profile}" key="update_profile.changePass"/></button>
                     </div>
                 </div>
             </form>

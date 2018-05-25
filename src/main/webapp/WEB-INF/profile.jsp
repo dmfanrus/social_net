@@ -28,20 +28,20 @@
                         <table class="table table-user-information">
                             <tbody>
                             <tr>
-                                <td>Name</td>
+                                <td><fmt:message bundle="${profile}" key="profile.name"/></td>
                                 <td>${userInfo.lastName} ${userInfo.firstName}</td>
                             </tr>
                             <tr>
-                                <td>Email</td>
+                                <td><fmt:message bundle="${profile}" key="profile.email"/></td>
                                 <td><a href="mailto:info@support.com">${userInfo.email}</a></td>
                             </tr>
                             <tr>
-                                <td>Date of Birth</td>
+                                <td><fmt:message bundle="${profile}" key="profile.dateOfBirth"/></td>
                                 <td>${userInfo.dateOfBirth}</td>
                             </tr>
                             <tr>
                             <tr>
-                                <td>Gender</td>
+                                <td><fmt:message bundle="${profile}" key="profile.gender"/></td>
                                 <td>${userInfo.gender}</td>
                             </tr>
                             <tr>
@@ -49,9 +49,7 @@
                                 <c:choose>
                                     <c:when test="${userInfo.id == sessionScope.user.id}">
                                         <c:url var="changeMyProfile" value="/profile/changer"/>
-                                        <form method="post" action="${newMsgUrl}">
-                                            <input type="hidden" name="action" value="get">
-                                            <input type="hidden" name="otherUserID" value="${userInfo.id}">
+                                        <form method="get" action="${changeMyProfile}">
                                             <button class="btn btn-info btn-block">
                                                 <fmt:message bundle="${profile}" key="profile.btn_change_profile"/>
                                             </button>
@@ -62,7 +60,9 @@
                                         <form method="post" action="${newMsgUrl}">
                                             <input type="hidden" name="action" value="get">
                                             <input type="hidden" name="otherUserID" value="${userInfo.id}">
-                                            <button class="btn btn-info btn-block">
+                                            <button class="btn btn-info btn-block"
+                                                    <c:if test="${userInfo.relationStatus.name()=='BLOCKEDBYME' ||
+                                                    userInfo.relationStatus.name()=='BLOCKEDBYOTHER'}">disabled</c:if>>
                                                 <fmt:message bundle="${profile}" key="profile.btn_new_msg"/>
                                             </button>
                                         </form>

@@ -53,6 +53,11 @@ public class RelationshipServiceImpl implements RelationshipService {
     }
 
     @Override
+    public Optional<RelationStatus> getRelationStatus(long currentUserID, long otherUserID) {
+        return relationshipDao.getRelationStatusWithTwoUsers(currentUserID,otherUserID);
+    }
+
+    @Override
     public void addFriendRequestFromCurrentUser(long currentUserID, long otherUserID, Timestamp ts_action) {
         notificationService.addNotification(Notification.builder()
                 .sender_id(currentUserID)
@@ -148,6 +153,11 @@ public class RelationshipServiceImpl implements RelationshipService {
     @Override
     public void deleteRelationships(long currentUserID, long otherUserID) {
         relationshipDao.deleteRelationships(currentUserID, otherUserID);
+    }
+
+    @Override
+    public Optional<RelationStatus> getRelationStatusByConvID(long conv_id) {
+        return relationshipDao.getRelationshipWithTwoUsersByConvID(conv_id);
     }
 
 

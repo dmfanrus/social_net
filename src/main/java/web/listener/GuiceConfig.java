@@ -22,8 +22,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
-import web.servlet.changers.ChangeRelationshipServlet;
-import web.servlet.changers.ChangerMessageServlet;
+import web.servlet.changers.*;
 
 import javax.servlet.annotation.WebListener;
 import javax.sql.DataSource;
@@ -32,8 +31,8 @@ import javax.sql.DataSource;
 public class GuiceConfig extends GuiceServletContextListener {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GuiceConfig.class);
-    private static class DbModule extends AbstractModule {
 
+    private static class DbModule extends AbstractModule {
         @Override
         protected void configure() {
             bind(PgConfig.class).toProvider(PgConfigProvider.class).in(Singleton.class);
@@ -61,14 +60,14 @@ public class GuiceConfig extends GuiceServletContextListener {
         @Override
         protected void configureServlets() {
             filter("/friends","/messages","/notifications","/messages_new",
-                    "/profile_update","/logout","/users", "/users/changer",
+                    "/profile/changer","/password/changer","/avatar/changer","/logout","/users", "/users/changer",
                     "/friends/changer", "/messages/changer").through(LoggedInFilter.class);
             filterRegex("/profile_[0-9]+").through(LoggedInFilter.class);
             filterRegex("/messages_[0-9]+").through(LoggedInFilter.class);
             filter("/login","/registration").through(LoggedOutFilter.class);
             serve("/").with(RootServlet.class);
-            serve("/help").with(HelpServlet.class);
             serve("/login").with(LoginServlet.class);
+            serve("/locale").with(LocaleServlet.class);
             serve("/registration").with(RegistrationServlet.class);
             serve("/logout").with(LogoutServlet.class);
             serveRegex("/profile_[0-9]+").with(ProfileServlet.class);
@@ -77,11 +76,15 @@ public class GuiceConfig extends GuiceServletContextListener {
             serve("/messages_new").with(MessageNewServlet.class);
             serve("/friends").with(FriendsServlet.class);
             serve("/notifications").with(NotificationServlet.class);
-            serve("/profile_update").with(ProfileUpdateServlet.class);
+
             serve("/users").with(UsersServlet.class);
             serve("/users/changer").with(ChangeRelationshipServlet.class);
             serve("/friends/changer").with(ChangeRelationshipServlet.class);
             serve("/messages/changer").with(ChangerMessageServlet.class);
+
+            serve("/profile/changer").with(ChangerProfileServlet.class);
+            serve("/password/changer").with(ChangerPasswordServlet.class);
+            serve("/avatar/changer").with(ChangerAvatarServlet.class);
         }
     }
 

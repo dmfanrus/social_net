@@ -3,7 +3,6 @@ package web.servlet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import model.ListNotifications;
-import model.Notification;
 import model.User;
 import service.NotificationService;
 
@@ -13,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 

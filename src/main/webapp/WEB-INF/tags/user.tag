@@ -23,8 +23,9 @@
     <div class="row">
         <div class="col-lg-2"></div>
         <div class="col-lg-8">
+
             <nav class="navbar navbar-inverse navbar-static-top">
-                <div class="container">
+                <%--<div class="container">--%>
                     <div class="navbar-header">
                         <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
                                 data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
@@ -47,8 +48,6 @@
                                     <c:url var="loginUrl" value="/registration"/>
                                     <li><a href="${loginUrl}"><fmt:message bundle="${menu}"
                                                                            key="menu.registration"/></a></li>
-                                    <c:url var="helpUrl" value="/help"/>
-                                    <li><a href="${helpUrl}"><fmt:message bundle="${menu}" key="menu.help"/></a></li>
                                 </c:when>
                                 <c:otherwise>
                                     <c:url var="profileUrl" value="/profile_${sessionScope.user.id}"/>
@@ -65,7 +64,8 @@
                                     <c:url var="notificationsUrl" value="/notifications">
                                         <c:param name="setInterval" value="day"/>
                                     </c:url>
-                                    <li><a href="${notificationsUrl}"><fmt:message bundle="${menu}" key="menu.notifications"/></a>
+                                    <li><a href="${notificationsUrl}"><fmt:message bundle="${menu}"
+                                                                                   key="menu.notifications"/></a>
                                     </li>
                                     <%--<c:url var="helpUrl" value="/help"/>--%>
                                     <%--<li><a href="${helpUrl}"><fmt:message bundle="${menu}" key="menu.help"/></a></li>--%>
@@ -76,17 +76,51 @@
                             </c:choose>
                         </ul>
                     </div>
-                </div>
+                <%--</div>--%>
             </nav>
             <jsp:doBody/>
         </div>
-        <div class="col-lg-2"></div>
+        <div class="col-lg-2">
+            <div class="pull-left">
+
+                <c:set var="currentUrl"
+                       value="${requestScope['javax.servlet.forward.request_uri']}?${pageContext.request.queryString}"/>
+                <c:url var="localUrl" value="/locale"/>
+                <form class="navbar-form navbar-right" action="${localUrl}" method="post">
+                <input type="hidden" name="redirect_to" value="${currentUrl}">
+                <input type="hidden" name="locale" value="en">
+                <div class="form-group">
+                    <fmt:message var="enTitle" bundle="${menu}" key="locale.select.en"/>
+                    <button type="submit" class="btn flag-icon flag-icon-us"
+                            title="${enTitle}"></button>
+                </div>
+                </form>
+                <form class="navbar-form navbar-right" action="${localUrl}" method="post">
+                    <input type="hidden" name="redirect_to" value="${currentUrl}">
+                    <input type="hidden" name="locale" value="ru">
+                    <div class="form-group">
+                        <fmt:message var="ruTitle" bundle="${menu}" key="locale.select.ru"/>
+                        <button type="submit" class="btn flag-icon flag-icon-ru"
+                                title="${ruTitle}"></button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 <footer class="footer">
     <div class="container" id="footer">
-        <p class="text-muted" style="text-align: center;">Designed by Mihail Gurko. Copyright &copy 2017. All rights
-            reserved.</p>
+        <div class="row">
+            <div class="col-lg-2"></div>
+            <div class="col-lg-8">
+                <p class="text-muted" style="text-align: center;">Designed by Mihail Gurko. Copyright &copy 2017. All
+                    rights
+                    reserved.</p>
+            </div>
+            <div class="col-lg-2">
+            </div>
+        </div>
+
     </div>
 </footer>
 </body>

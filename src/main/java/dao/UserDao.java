@@ -13,9 +13,9 @@ import java.util.Optional;
 public interface UserDao {
     Optional<User> createUser(User user);
     void deleteUserById(long id);
-    void updateUserInfo(User user);
-    void updateUserLogin(Credentials credentials);
-    void updateUserPassword(Credentials credentials);
+    Optional<User> updateUserAllInfo(User user);
+    Optional<User> updateProfile(User user);
+    Optional<User> updatePassword(Credentials credentials);
     Optional<User> getCurrentUserWithAllInfoById(long id);
     Optional<User> getCurrentUserWithAllInfoByLogin(String login);
     Optional<User> getCurrentUserWithoutCredentialsByID(long id);

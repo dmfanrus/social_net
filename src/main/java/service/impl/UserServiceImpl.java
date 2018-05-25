@@ -1,10 +1,8 @@
 package service.impl;
 
 import com.google.inject.Inject;
-import dao.NotificationDao;
 import dao.UserDao;
 import model.Credentials;
-import model.Notification;
 import model.User;
 import service.NotificationService;
 import service.RelationshipService;
@@ -61,6 +59,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public boolean validateUserByCurrentCredantials(Credentials credentials) {
+        Optional<Credentials> currentCredentials = userDao.getCredentialsByLogin(credentials.getLogin());
+        if (currentCredentials.isPresent() && securityService.validate(credentials.getPassword(),currentCredentials.get().getPassword())) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
     public boolean checkExistByLogin(String login) {
         return userDao.getCredentialsByLogin(login).isPresent();
     }
@@ -84,6 +92,16 @@ public class UserServiceImpl implements UserService {
         } else {
             return userDao.getCountAllUsers();
         }
+    }
+
+    @Override
+    public Optional<User> updateProfile(User userIn) {
+        return userDao.updateProfile(userIn);
+    }
+
+    @Override
+    public Optional<User> updatePassword(Credentials credentials) {
+        return userDao.updatePassword(credentials);
     }
 
     @Override

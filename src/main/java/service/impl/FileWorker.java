@@ -59,7 +59,7 @@ public class FileWorker{
         return sb.toString();
     }
 
-    private static void exists(String fileName) throws FileNotFoundException {
+    public static void exists(String fileName) throws FileNotFoundException {
         File file = new File(fileName);
         if (!file.exists()){
             throw new FileNotFoundException(file.getName());

@@ -21,7 +21,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void addNotification(Notification notification) {
-        notificationDao.AddNotification(notification);
+        notificationDao.addNotification(notification);
     }
 
     @Override

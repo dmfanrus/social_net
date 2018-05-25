@@ -375,6 +375,47 @@ public class RelationshipDaoImpl implements RelationshipDao {
         return Optional.empty();
     }
 
+    @Override
+    public Optional<RelationStatus> getRelationStatusWithTwoUsers(long currentUserID, long otherUserID) {
+        try (Connection connection = dataSource.getConnection()) {
+            final PreparedStatement select = connection.prepareStatement(
+                    "SELECT rel_status FROM relationships " +
+                            "WHERE (first_user_id=? AND second_user_id=?)");
+            select.setLong(1, currentUserID);
+            select.setLong(2, otherUserID);
+            select.executeQuery();
+            final ResultSet resultSet = select.getResultSet();
+            if (resultSet.next()) {
+                return Optional.of(RelationStatus.valueOf(resultSet.getString(1)));
+            } else {
+                return Optional.of(RelationStatus.UNKNOW);
+            }
+        } catch (SQLException e) {
+            log.error("Failed to get count of users with fullname", e);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<RelationStatus> getRelationshipWithTwoUsersByConvID(long conv_id) {
+        try (Connection connection = dataSource.getConnection()) {
+            final PreparedStatement select = connection.prepareStatement(
+                    "SELECT R.rel_status FROM relationships R, conversations C " +
+                            "WHERE C.id = ? AND R.second_user_id = C.second_user_id");
+            select.setLong(1, conv_id);
+            select.executeQuery();
+            final ResultSet resultSet = select.getResultSet();
+            if (resultSet.next()) {
+                return Optional.of(RelationStatus.valueOf(resultSet.getString(1)));
+            } else {
+                return Optional.of(RelationStatus.UNKNOW);
+            }
+        } catch (SQLException e) {
+            log.error("Failed to get count of users with fullname", e);
+        }
+        return Optional.empty();
+    }
+
 
     private RelationStatus getRelStatusByString(String relationStatus, long currentUserID, long getUserID) {
         if (relationStatus == null) {

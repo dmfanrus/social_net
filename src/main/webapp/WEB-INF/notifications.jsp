@@ -87,7 +87,12 @@
                                         <p>
                                             <fmt:message bundle="${notification_status}"
                                                          key="notification_status.sender_user"/>
-                                            <c:url var="userUrl" value="/profile_${currentNotification.sender_id}"/>
+                                                <%--<c:if test="${currentNotification.not_status>=16}">--%>
+                                                <%--<c:url var="userUrl" value="/profile_${currentNotification.sender_id}"/>--%>
+                                                <%--</c:if>--%>
+                                                <%--<c:if test="${currentNotification.not_status<16}">--%>
+                                            <c:url var="userUrl" value="/profile_${currentNotification.recipient_id}"/>
+                                                <%--</c:if>--%>
                                             <a href="${userUrl}" aria-label="user">
                                                 <c:out value="${currentNotification.lastName} ${currentNotification.firstName}"/>
                                             </a>
@@ -99,7 +104,8 @@
                                     <td style="padding-left: 0;padding-right: 0; text-align: center" class="pull-right">
                                         <h7>
                                             <fmt:formatDate type="time" value="${currentNotification.ts_action}"/><br>
-                                            <fmt:formatDate pattern="dd/MM/yy" value="${currentNotification.ts_action}"/>
+                                            <fmt:formatDate pattern="dd/MM/yy"
+                                                            value="${currentNotification.ts_action}"/>
                                         </h7>
 
                                     </td>

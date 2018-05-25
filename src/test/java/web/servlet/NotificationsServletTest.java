@@ -42,6 +42,7 @@ public class NotificationsServletTest{
                 .dateOfBirth(LocalDate.of(1995, 11, 11))
                 .relationStatus(RelationStatus.ME)
                 .build();
+
         for (int i = 0; i < 10; i++){
             notifications.add(Notification.builder()
                     .id(i)

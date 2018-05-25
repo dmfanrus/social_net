@@ -55,13 +55,16 @@ public class FormValidation {
 
     public void validateCredentials(Credentials credentials){
         validateString("password",credentials.getPassword());
-        if(validateString("login",credentials.getLogin())){
-            if(!credentials.getLogin().matches(LOGIN_PATTERN)) {
+        validateLogin(credentials.getLogin());
+    }
+
+    public void validateLogin(String login){
+        if(validateString("login",login)){
+            if(!login.matches(LOGIN_PATTERN)) {
                 setError("login", "loginWrong");
             }
         }
     }
-
     public void validateEmail(String email){
         if(validateString("email",email)){
             if(!email.matches(EMAIL_PATTERN)) {

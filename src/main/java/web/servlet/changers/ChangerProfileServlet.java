@@ -1,4 +1,4 @@
-package web.servlet;
+package web.servlet.changers;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -16,29 +16,31 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Optional;
 
 @Singleton
-public class RegistrationServlet extends HttpServlet {
+public class ChangerProfileServlet extends HttpServlet {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ChangerProfileServlet.class);
 
-    private final UserService userService;
     private final SecurityService securityService;
-    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RegistrationServlet.class);
+    private final UserService userService;
     private final NotificationService notificationService;
 
     @Inject
-    public RegistrationServlet(UserService userService, SecurityService securityService, NotificationService notificationService) {
-        this.userService = userService;
+    public ChangerProfileServlet(SecurityService securityService, UserService userService, NotificationService notificationService) {
         this.securityService = securityService;
+        this.userService = userService;
         this.notificationService = notificationService;
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        log.debug("GET");
-        req.getRequestDispatcher("/WEB-INF/registration.jsp")
+        log.debug("GET - user[{}]", ((User) req.getSession(false).getAttribute("user")).getId());
+        req.getRequestDispatcher("/WEB-INF/update_profile.jsp")
                 .forward(req, resp);
     }
 
@@ -53,43 +55,43 @@ public class RegistrationServlet extends HttpServlet {
                 req.getParameter("email"),
                 req.getParameter("dateOfBirth"),
                 req.getParameter("gender"));
-        log.debug("Availably of user in session: {}",req.getSession(false).getAttribute("user"));
+        User currentUser = (User) req.getSession(false).getAttribute("user");
+        log.debug("Availably of user in session: {}", currentUser);
+
 
         HashMap<String, String> fields = new HashMap<>();
         fields.put("firstName", req.getParameter("firstName"));
         fields.put("lastName", req.getParameter("lastName"));
         fields.put("login", req.getParameter("username"));
-        fields.put("password", req.getParameter("password"));
+        fields.put("currentPassword", req.getParameter("currentPassword"));
         fields.put("email", req.getParameter("email"));
         fields.put("dateOfBirth", req.getParameter("dateOfBirth"));
         fields.put("gender", req.getParameter("gender"));
 
-        FormValidation validate =  formValidation(fields);
+        FormValidation validate = formValidation(fields);
 
         if (validate.isValid()) {
-            log.debug("Form fields is valid");
             User userIn = User.builder()
                     .firstName(fields.get("firstName"))
                     .lastName(fields.get("lastName"))
                     .login(fields.get("login"))
                     .email(fields.get("email"))
-                    .password(securityService.encrypt(fields.get("password")))
                     .dateOfBirth(LocalDate.parse(fields.get("dateOfBirth")))
                     .gender(fields.get("gender").equals("M") ? Gender.MALE : Gender.FEMALE)
                     .build();
-
-            Optional<User> user = userService.createUser(userIn);
-            if (user.isPresent()) {
+            Optional<User> userOut = userService.updateProfile(userIn);
+            log.debug(userOut.toString());
+            if (userOut.isPresent()) {
                 notificationService.addNotification(Notification.builder()
-                        .sender_id(user.get().getId())
-                        .recipient_id(user.get().getId())
-                        .not_status(0)
-                        .ts_action(user.get().getTimeCreate())
+                        .sender_id(userOut.get().getId())
+                        .recipient_id(userOut.get().getId())
+                        .not_status(1)
+                        .ts_action(Timestamp.valueOf(LocalDateTime.now()))
                         .build());
-                log.debug("Create user[{}] is success", user.get().getId());
-                req.getSession(true).setAttribute("user", user.get());
+                log.debug("Changed user[{}] is success", userOut.get().getId());
+                req.getSession(false).setAttribute("user", userOut.get());
                 resp.setStatus(HttpServletResponse.SC_OK);
-                resp.sendRedirect(req.getContextPath() + "/profile_" + user.get().getId());
+                req.getRequestDispatcher("/WEB-INF/update_profile.jsp").forward(req, resp);
                 return;
             } else {
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -98,25 +100,32 @@ public class RegistrationServlet extends HttpServlet {
             }
         }
 
-        log.debug("Form is not valid({})",validate.getErrors());
-        req.setAttribute("fields", fields);
+        log.debug("Form is not valid({})", validate.getErrors());
         req.setAttribute("errors", validate.getErrors());
-        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        req.getRequestDispatcher("/WEB-INF/registration.jsp").forward(req, resp);
+        log.debug(fields.toString());
+        log.debug(validate.getErrors().toString());
+        resp.setStatus(HttpServletResponse.SC_OK);
+        req.getRequestDispatcher("/WEB-INF/update_profile.jsp").forward(req, resp);
     }
 
     private FormValidation formValidation(HashMap<String, String> fields) {
         FormValidation validate = new FormValidation();
+        Credentials credentials = Credentials.builder()
+                .login(fields.get("login"))
+                .password(fields.get("currentPassword"))
+                .build();
+        validate.validateCredentials(credentials);
         validate.validateFirstName(fields.get(("firstName")));
         validate.validateLastName(fields.get(("lastName")));
         validate.validateEmail(fields.get("email"));
-        validate.validateCredentials(Credentials.builder().login(fields.get("login")).password(fields.get("password")).build());
         validate.validateDate(fields.get("dateOfBirth"));
         validate.validateString("gender", fields.get("gender"));
 
-        if (userService.checkExistByLogin(fields.get("login")))
-            validate.setError("login", "loginNotUsed");
+        if (!userService.validateUserByCurrentCredantials(credentials)) {
+            validate.setError("password", "wrongPassword");
+        }
+
+
         return validate;
     }
-
 }

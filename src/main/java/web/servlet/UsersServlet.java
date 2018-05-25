@@ -10,8 +10,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,7 +46,6 @@ public class UsersServlet extends HttpServlet {
             }
             users = userService.getUsers(currentUserID, fullName, (currentPage - 1) * USERSONPAGE, USERSONPAGE);
             if (users.isPresent()) {
-
                 long startPage = currentPage - 2 > 0 ? currentPage - 2 : 1;
                 long endPage = startPage + 4 <= countPages ? startPage + 4 : countPages;
                 req.setAttribute("startPage", startPage);

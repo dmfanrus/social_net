@@ -30,7 +30,7 @@ public class UserDaoImpl implements UserDao {
     @Override
     public Optional<User> createUser(User user) {
         try (Connection connection = dataSource.getConnection()) {
-            final String[] returning = {"user_id"};
+            final String[] returning = {"id"};
             final PreparedStatement insert = connection.prepareStatement(
                     "INSERT INTO users " +
                             "(firstname, lastname, login, hashpass, email, dateofbirth, gender, ts_create) " +
@@ -71,49 +71,107 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public void updateUserInfo(User user) {
+    public Optional<User> updateUserAllInfo(User user) {
         try (Connection connection = dataSource.getConnection()) {
-            final PreparedStatement delete = connection.prepareStatement(
+            final PreparedStatement update = connection.prepareStatement(
+                    "UPDATE users " +
+                            "SET firstname=?, lastname=?, login=?, hashpass=?, email=?, " +
+                            "dateofbirth=?, gender=? " +
+                            "WHERE id=? RETURNING *");
+            update.setString(1, user.getFirstName());
+            update.setString(2, user.getLastName());
+            update.setString(3, user.getLogin());
+            update.setString(4, user.getPassword());
+            update.setString(5, user.getEmail());
+            update.setDate(6, Date.valueOf(user.getDateOfBirth()));
+            update.setString(7, user.getGender().name());
+            update.setLong(8, user.getId());
+            update.executeUpdate();
+            final ResultSet generatedKeys = update.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                return Optional.of(
+                        User.builder()
+                                .id(generatedKeys.getLong(1))
+                                .firstName(generatedKeys.getString(2))
+                                .lastName(generatedKeys.getString(3))
+                                .login(generatedKeys.getString(4))
+                                .password(generatedKeys.getString(5))
+                                .email(generatedKeys.getString(6))
+                                .dateOfBirth(generatedKeys.getDate(7).toLocalDate())
+                                .gender(Gender.valueOf(generatedKeys.getString(8)))
+                                .timeCreate(generatedKeys.getTimestamp(9))
+                                .build());
+            }
+        } catch (SQLException e) {
+            log.error("Failed to get count of users with fullname", e);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<User> updateProfile(User user) {
+        try (Connection connection = dataSource.getConnection()) {
+            final PreparedStatement update = connection.prepareStatement(
                     "UPDATE users " +
                             "SET firstname=?, lastname=?, email=?, " +
                             "dateofbirth=?, gender=? " +
-                            "WHERE id=?");
-            delete.setString(1, user.getFirstName());
-            delete.setString(2, user.getLastName());
-            delete.setString(3, user.getEmail());
-            delete.setDate(4, Date.valueOf(user.getDateOfBirth()));
-            delete.setString(5, user.getGender().name());
-            delete.setLong(6, user.getId());
-            delete.executeUpdate();
+                            "WHERE login=? RETURNING *;");
+            update.setString(1, user.getFirstName());
+            update.setString(2, user.getLastName());
+            update.setString(3, user.getEmail());
+            update.setDate(4, Date.valueOf(user.getDateOfBirth()));
+            update.setString(5, user.getGender().name());
+            update.setString(6, user.getLogin());
+            update.executeQuery();
+            final ResultSet resultSet = update.getResultSet();
+            if (resultSet.next()) {
+                return Optional.of(
+                        User.builder()
+                                .id(resultSet.getLong(1))
+                                .firstName(resultSet.getString(2))
+                                .lastName(resultSet.getString(3))
+                                .login(resultSet.getString(4))
+                                .password(resultSet.getString(5))
+                                .email(resultSet.getString(6))
+                                .dateOfBirth(resultSet.getDate(7).toLocalDate())
+                                .gender(Gender.valueOf(resultSet.getString(8)))
+                                .timeCreate(resultSet.getTimestamp(9))
+                                .build());
+            }
+
         } catch (SQLException e) {
             log.error("Failed to get count of users with fullname", e);
         }
+        return Optional.empty();
     }
 
     @Override
-    public void updateUserLogin(Credentials credentials) {
+    public Optional<User> updatePassword(Credentials credentials) {
         try (Connection connection = dataSource.getConnection()) {
-            final PreparedStatement delete = connection.prepareStatement(
-                    "UPDATE users SET login=? WHERE id=?");
-            delete.setString(1, credentials.getLogin());
-            delete.setLong(2, credentials.getId());
-            delete.executeUpdate();
+            final PreparedStatement update = connection.prepareStatement(
+                    "UPDATE users SET hashpass=? WHERE login=? RETURNING *;");
+            update.setString(1, credentials.getPassword());
+            update.setString(2, credentials.getLogin());
+            update.executeQuery();
+            final ResultSet resultSet = update.getResultSet();
+            if (resultSet.next()) {
+                return Optional.of(
+                        User.builder()
+                                .id(resultSet.getLong(1))
+                                .firstName(resultSet.getString(2))
+                                .lastName(resultSet.getString(3))
+                                .login(resultSet.getString(4))
+                                .password(resultSet.getString(5))
+                                .email(resultSet.getString(6))
+                                .dateOfBirth(resultSet.getDate(7).toLocalDate())
+                                .gender(Gender.valueOf(resultSet.getString(8)))
+                                .timeCreate(resultSet.getTimestamp(9))
+                                .build());
+            }
         } catch (SQLException e) {
             log.error("Failed to get count of users with fullname", e);
         }
-    }
-
-    @Override
-    public void updateUserPassword(Credentials credentials) {
-        try (Connection connection = dataSource.getConnection()) {
-            final PreparedStatement delete = connection.prepareStatement(
-                    "UPDATE users SET hashpass=? WHERE id=?");
-            delete.setString(1, credentials.getPassword());
-            delete.setLong(2, credentials.getId());
-            delete.executeUpdate();
-        } catch (SQLException e) {
-            log.error("Failed to get count of users with fullname", e);
-        }
+        return Optional.empty();
     }
 
     @Override

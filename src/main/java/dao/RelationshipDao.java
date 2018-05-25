@@ -1,9 +1,9 @@
 package dao;
 
+import model.RelationStatus;
 import model.Relationship;
 import model.User;
 
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,4 +24,7 @@ public interface RelationshipDao {
     Optional<List<User>> getSeveralFriends(long currentUserID, String firstName, String lastName, long start_num, long counts);
     Optional<Long> getCountSeveralFriends(long currentUserID, String firstName, String lastName);
 
+    Optional<RelationStatus> getRelationStatusWithTwoUsers(long currentUserID, long otherUserID);
+
+    Optional<RelationStatus> getRelationshipWithTwoUsersByConvID(long conv_id);
 }

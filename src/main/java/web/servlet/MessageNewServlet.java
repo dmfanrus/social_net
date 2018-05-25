@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @Singleton
@@ -59,16 +58,13 @@ public class MessageNewServlet extends HttpServlet {
                     resp.sendRedirect(req.getContextPath() + "/messages_" + existConv.get());
                     return;
                 } else {
-//                    Optional<List<Conversation>> conversations = conversationService.getListConversation(currentUserID);
-//                    if (conversations.isPresent()) {
-                        req.setAttribute("convList", new ArrayList<Conversation>());
-                        req.setAttribute("msgList", new ArrayList<Message>());
-                        req.setAttribute("otherUserID", otherUserID);
-                        resp.setStatus(HttpServletResponse.SC_OK);
-                        req.getRequestDispatcher("/WEB-INF/messages.jsp")
-                                .forward(req, resp);
-                        return;
-//                    }
+                    req.setAttribute("convList", new ArrayList<Conversation>());
+                    req.setAttribute("msgList", new ArrayList<Message>());
+                    req.setAttribute("otherUserID", otherUserID);
+                    resp.setStatus(HttpServletResponse.SC_OK);
+                    req.getRequestDispatcher("/WEB-INF/messages.jsp")
+                            .forward(req, resp);
+                    return;
                 }
             } else if (action.equals("write")) {
                 Optional<Long> conv_id = conversationService.createConversation(currentUserID, otherUserID,

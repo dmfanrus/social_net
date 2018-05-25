@@ -44,29 +44,22 @@
             <c:forEach items="${usersList}" var="currentUser">
                 <div class="panel panel-default">
                     <div class="row">
-                            <%--<div class="media">--%>
                         <div class="col-lg-3 col-sm-3 col-md-4">
-                                <%--<div class="col-lg-8 col-md-8 col-sm-8">--%>
                             <c:url var="userUrl" value="/profile_${currentUser.id}"/>
-                                <%--<a class="pull-left" href="${userUrl}">--%>
                             <a href="${userUrl}">
                                 <img class="img-rounded img-responsive"
-                                    <%--<img class="media-object"--%>
                                      src="${pageContext.request.contextPath}/resources/img/avatar_default.png">
                             </a>
-                                <%--<div class="media-body">--%>
                         </div>
                         <div class="col-lg-5 col-sm-5 col-md-8">
                             <br>
                             <h4>
                                 <div class="row">
-                                        <%--<div class="col-lg-12 col-md-8 col-sm-8">--%>
                                     <c:url var="userUrl" value="/profile_${currentUser.id}"/>
                                     <a href="${userUrl}" aria-label="user">
                                         <c:out value="${currentUser.lastName}"/> <c:out
                                             value="${currentUser.firstName}"/>
                                     </a>
-                                        <%--</div>--%>
                                 </div>
                             </h4>
                             <h5>
